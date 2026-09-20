@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "beamfix"
+version = "0.1.0"
+description = "Local-first Linux display diagnostics"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+beamfix = "beamfix.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["beamfix*"]
