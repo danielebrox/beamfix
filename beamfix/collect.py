@@ -33,7 +33,7 @@ def _state(path: Path, allowed: set[str], errors: list[str]) -> str:
     if value is None:
         return "unknown"
     if value not in allowed:
-        errors.append(f"{path.parent.name}/{path.name}: valore non riconosciuto")
+        errors.append(f"{path.parent.name}/{path.name}: unrecognized value")
         return "unknown"
     return value
 
@@ -55,12 +55,12 @@ def collect(
         desktop=env.get("XDG_CURRENT_DESKTOP", "unknown"),
     )
     if snapshot.system != "Linux":
-        snapshot.errors.append("Questa versione supporta soltanto Linux.")
+        snapshot.errors.append("This version supports Linux only.")
         return snapshot
     try:
         entries = sorted(drm_root.iterdir(), key=lambda path: path.name)
     except OSError as exc:
-        snapshot.errors.append(f"DRM non accessibile: {type(exc).__name__}")
+        snapshot.errors.append(f"DRM unavailable: {type(exc).__name__}")
         return snapshot
     for entry in entries:
         if re.fullmatch(r"card\d+", entry.name):
@@ -76,5 +76,5 @@ def collect(
             modes = None if raw_modes is None else tuple(dict.fromkeys(raw_modes.splitlines()))
             snapshot.connectors.append(Connector(entry.name, connector_kind(entry.name), status, enabled, modes))
     if not snapshot.connectors:
-        snapshot.errors.append("Nessun connettore DRM osservabile in questo ambiente.")
+        snapshot.errors.append("No DRM connectors observable in this environment.")
     return snapshot

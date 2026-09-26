@@ -80,9 +80,9 @@ class GuidedSessionTests(unittest.TestCase):
         )
         self.assertEqual(code, 0)
         self.assertEqual(reads, 2)
-        self.assertIn("Immagine attesa confermata dall'utente", output)
-        self.assertIn("Prima: 'card0-HDMI-A-1': collegato, uscita disabilitata", output)
-        self.assertIn("Dopo: 'card0-HDMI-A-1': collegato, uscita abilitata", output)
+        self.assertIn("Expected image confirmed by the user", output)
+        self.assertIn("Before: 'card0-HDMI-A-1': connected, output disabled", output)
+        self.assertIn("After: 'card0-HDMI-A-1': connected, output enabled", output)
 
     def test_enabled_output_does_not_count_as_visual_success(self):
         code, output, reads = self.session(
@@ -91,16 +91,16 @@ class GuidedSessionTests(unittest.TestCase):
         )
         self.assertEqual(code, 2)
         self.assertEqual(reads, 2)
-        self.assertNotIn("Immagine attesa confermata dall'utente", output)
-        self.assertIn("Lo schermo proiettato è nero", output)
+        self.assertNotIn("Expected image confirmed by the user", output)
+        self.assertIn("The projected screen is black", output)
 
     def test_failed_activation_is_not_repeated(self):
         data = snapshot(port(enabled="disabled"))
         code, output, reads = self.session([data, data], ["1", "1", "1", "2", "2", "2", "2"])
         self.assertEqual(code, 1)
         self.assertEqual(reads, 2)
-        self.assertEqual(output.count("Prova: Attivare l'uscita"), 1)
-        self.assertIn("saltata, non verificata", output)
+        self.assertEqual(output.count("Step: Enable the output"), 1)
+        self.assertIn("skipped, not verified", output)
 
     def test_reconnect_changes_next_step_to_activation(self):
         code, output, reads = self.session(
@@ -110,77 +110,77 @@ class GuidedSessionTests(unittest.TestCase):
         )
         self.assertEqual(code, 0)
         self.assertEqual(reads, 3)
-        self.assertIn("Prova: Attivare l'uscita", output)
+        self.assertIn("Step: Enable the output", output)
 
     def test_symptom_change_routes_to_presentation(self):
         data = snapshot(port())
         code, output, reads = self.session([data, data, data], ["1", "1", "1", "4", "1", "1"])
         self.assertEqual(code, 0)
         self.assertEqual(reads, 3)
-        self.assertIn("Prova: Mostrare la presentazione", output)
+        self.assertIn("Step: Show the presentation", output)
 
     def test_selects_one_of_several_displays(self):
         data = snapshot(port(), port(name="card1-DP-1", enabled="disabled"))
         code, output, _ = self.session([data], ["1", "2", "0"])
         self.assertEqual(code, 2)
-        self.assertIn("Stato osservato: 'card1-DP-1'", output)
-        self.assertIn("Prova: Attivare l'uscita", output)
+        self.assertIn("Observed state: 'card1-DP-1'", output)
+        self.assertIn("Step: Enable the output", output)
 
     def test_unknown_target_keeps_uncertainty(self):
         code, output, _ = self.session([snapshot(port())], ["1", "2", "2", "2", "2", "2"])
         self.assertEqual(code, 2)
-        self.assertIn("Dati insufficienti", output)
-        self.assertNotIn("Prova: Attivare", output)
+        self.assertIn("Insufficient data", output)
+        self.assertNotIn("Step: Enable", output)
 
     def test_missing_drm_does_not_claim_success(self):
-        data = snapshot(errors=["DRM non accessibile"])
+        data = snapshot(errors=["DRM unavailable"])
         code, output, reads = self.session([data, data], ["1", "1", "2"])
         self.assertEqual(code, 2)
         self.assertEqual(reads, 2)
-        self.assertIn("Dati insufficienti", output)
-        self.assertIn("dati mancanti", output)
+        self.assertIn("Insufficient data", output)
+        self.assertIn("data are missing", output)
 
     def test_visual_result_can_be_confirmed_despite_incomplete_data(self):
-        data = snapshot(errors=["DRM non accessibile"])
+        data = snapshot(errors=["DRM unavailable"])
         code, output, _ = self.session([data, data], ["1", "1", "1"])
         self.assertEqual(code, 0)
-        self.assertIn("dati mancanti", output)
+        self.assertIn("data are missing", output)
 
     def test_unknown_state_gets_one_refresh(self):
         data = snapshot(port(status="unknown"))
         code, output, reads = self.session([data, data], ["1", "1", "1", "2"])
         self.assertEqual(code, 2)
         self.assertEqual(reads, 2)
-        self.assertEqual(output.count("Prova: Ripetere la lettura"), 1)
+        self.assertEqual(output.count("Step: Read the data again"), 1)
 
     def test_no_visual_verification_is_not_success(self):
         data = snapshot(port())
         code, output, _ = self.session([data, data], ["2", "1", "1", "5"])
         self.assertEqual(code, 2)
-        self.assertIn("Esito visivo: non verificabile", output)
+        self.assertIn("Visual result: cannot be verified", output)
 
     def test_hotplug_requires_explicit_new_target(self):
         old = snapshot(port())
         new = snapshot(port(name="card1-DP-1", enabled="disabled"))
         code, output, _ = self.session([old, new], ["1", "1", "1", "1", "2", "0"])
         self.assertEqual(code, 2)
-        self.assertIn("identifica di nuovo il proiettore", output)
-        self.assertIn("Prova: Attivare l'uscita", output)
+        self.assertIn("identify the projector again", output)
+        self.assertIn("Step: Enable the output", output)
 
     def test_moving_to_another_port_requires_reselection(self):
         old = snapshot(port(), port(name="card1-DP-1", status="disconnected", enabled="disabled"))
         new = snapshot(port(status="disconnected"), port(name="card1-DP-1", enabled="disabled"))
         code, output, _ = self.session([old, new], ["1", "1", "1", "2", "2", "0"])
         self.assertEqual(code, 2)
-        self.assertIn("identifica di nuovo il proiettore", output)
-        self.assertIn("Stato osservato: 'card1-DP-1'", output)
+        self.assertIn("identify the projector again", output)
+        self.assertIn("Observed state: 'card1-DP-1'", output)
 
     def test_skips_do_not_rescan_or_repeat(self):
         data = snapshot(port())
         code, output, reads = self.session([data], ["2", "1"] + ["2"] * 6)
         self.assertEqual(code, 1)
         self.assertEqual(reads, 1)
-        self.assertEqual(output.count("Prova: "), 6)
+        self.assertEqual(output.count("Step: "), 6)
 
     def test_eof_and_keyboard_interrupt_produce_summary(self):
         for interruption in (EOFError(), KeyboardInterrupt()):
@@ -188,20 +188,20 @@ class GuidedSessionTests(unittest.TestCase):
                 code, output, reads = self.session([], [interruption])
                 self.assertEqual(code, 2)
                 self.assertEqual(reads, 0)
-                self.assertIn("Percorso interrotto", output)
+                self.assertIn("Troubleshooting interrupted", output)
 
     def test_interruption_after_action_preserves_attempt(self):
         data = snapshot(port())
         code, output, _ = self.session([data, data], ["1", "1", "1", EOFError()])
         self.assertEqual(code, 2)
-        self.assertIn("Controllare alimentazione e ingresso: eseguita", output)
-        self.assertIn("Esito visivo: non confermato", output)
+        self.assertIn("Check power and input: performed", output)
+        self.assertIn("Visual result: not confirmed", output)
 
     def test_invalid_answers_reprompt_without_losing_state(self):
         code, output, reads = self.session([], ["abc", "-1", "99", "0"])
         self.assertEqual(code, 2)
         self.assertEqual(reads, 0)
-        self.assertEqual(output.count("Inserisci il numero"), 3)
+        self.assertEqual(output.count("Enter the number"), 3)
 
     def test_cli_dispatch_and_exit_code(self):
         with patch("beamfix.troubleshoot.run", return_value=1) as guided:

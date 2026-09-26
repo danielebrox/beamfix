@@ -1,41 +1,48 @@
 # Roadmap
 
-## 0.1 — Diagnosi locale (implementata)
+## 0.1 — Local diagnostics (implemented)
 
-- CLI `doctor`, output italiano e JSON v1.
-- Lettura DRM, GPU/driver e contesto della sessione.
-- Regole iniziali e gestione di dati incompleti.
-- Test con hardware simulato e configurazione CI.
+- `doctor` CLI and JSON v1 output.
+- DRM, GPU/driver and session context collection.
+- Initial rules and handling of incomplete data.
+- Tests with simulated hardware and CI configuration.
 
-## 0.2 — Percorso guidato (implementato)
+## 0.2 — Guided troubleshooting (implemented)
 
-- Comando `troubleshoot` per proiettore collegato con immagine assente o inattesa.
-- Distinzione tra nessun segnale, schermo nero e desktop senza presentazione.
-- Selezione esplicita dell'uscita; nessuna identificazione automatica come proiettore.
-- Una prova manuale alla volta, nuova lettura e domanda sull'esito visivo.
-- Percorso adattato a stato e sintomo; prove già eseguite o saltate non ripetute.
-- Riepilogo con osservazioni prima/dopo, prove saltate e risultato confermato o incerto.
-- Test simulati per dati mancanti, più display, cambi di collegamento e interruzioni.
+- `troubleshoot` command for a connected projector with a missing or unexpected image.
+- Distinction between No signal, a black screen and a desktop without the presentation.
+- Explicit output selection; no automatic identification of a device as a projector.
+- One manual step at a time, a fresh reading and a question about the visual result.
+- A flow adapted to state and symptom; completed or skipped steps are not repeated.
+- A summary with before/after observations, skipped steps and confirmed or uncertain results.
+- Simulated tests for missing data, multiple displays, connection changes and interruptions.
 
-Da verificare sul campo: completare una sessione su un proiettore reale, controllando
-che le indicazioni corrispondano al desktop e che il riepilogo sia utile in aula.
-I test simulati non dimostrano compatibilità hardware né successo di una proiezione.
+Field validation remains: complete a session with a real projector, checking that
+the instructions match the desktop and that the summary is useful in a classroom.
+Simulated tests do not establish hardware compatibility or successful projection.
 
-## 0.3 — Primo backend di correzione
+### 0.2.1 — English interface and documentation (implemented)
 
-Scegliere un solo ambiente desktop dopo la prima prova sul computer di sviluppo.
-Rilevare la configurazione corrente, proporre l'attivazione di un'uscita e offrire
-un'anteprima dell'azione. Applicare una modifica per volta, con ripristino automatico
-e conferma visiva. Verificare timeout, crash e scollegamento del proiettore.
+- English command help, diagnostics, collection errors, guided steps and summaries.
+- English README, architecture documentation and roadmap.
+- English as the working language for GitHub contributions.
+- Existing commands, diagnostic codes, JSON schema and exit codes preserved.
 
-## 0.4 — Uso quotidiano
+## 0.3 — First backend for applying fixes
 
-Interfaccia con «Diagnostica» e «Prova correzione»; duplicazione/estensione e selezione
-di una modalità compatibile usando le informazioni del backend. Aggiungere
-diagnosi audio HDMI e un secondo ambiente desktop solo dopo aver verificato il primo.
+Choose a single desktop environment after the first test on the development
+computer. Detect the current configuration, propose enabling an output and show
+an action preview. Apply one change at a time, with automatic rollback and visual
+confirmation. Verify timeout, crash and projector disconnection behavior.
 
-## Prima di una release pubblica
+## 0.4 — Everyday use
 
-Scegliere licenza e modalità di distribuzione. Provare su proiettori reali,
-HDMI diretto, adattatori USB-C e dock; documentare desktop, GPU e driver verificati.
-Nessuna promessa di compatibilità universale o di riparazione dei guasti fisici.
+An interface with Diagnose and Try a fix actions; mirroring/extension and selection
+of a compatible mode using backend data. Add HDMI audio diagnostics and a second
+desktop environment only after verifying the first.
+
+## Before a public release
+
+Choose a license and distribution method. Test real projectors, direct HDMI,
+USB-C adapters and docks; document the desktops, GPUs and drivers verified.
+Do not promise universal compatibility or repair of physical faults.

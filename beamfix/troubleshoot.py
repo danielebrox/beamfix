@@ -17,59 +17,59 @@ class Step:
 
 STEPS = {
     "input": Step(
-        "input", "Controllare alimentazione e ingresso",
-        "Il rilevamento del computer non conferma quale ingresso stia mostrando il proiettore.",
-        "Verifica che il proiettore sia acceso e seleziona l'ingresso del cavo collegato "
-        "(per esempio HDMI 1 oppure HDMI 2).",
+        "input", "Check power and input",
+        "Detection by the computer does not confirm which input the projector is displaying.",
+        "Check that the projector is on and select the input for the connected cable "
+        "(for example, HDMI 1 or HDMI 2).",
     ),
     "reconnect": Step(
-        "reconnect", "Ricollegare il proiettore",
-        "Un nuovo collegamento permette di verificare se Linux rileva il display e le sue modalità video.",
-        "Scollega e ricollega il cavo del proiettore, controllando anche i raccordi "
-        "dell'eventuale adattatore. Attendi qualche secondo.",
+        "reconnect", "Reconnect the projector",
+        "Reconnecting lets us check whether Linux detects the display and its video modes.",
+        "Disconnect and reconnect the projector cable, checking the connections "
+        "on any adapter as well. Wait a few seconds.",
     ),
     "direct": Step(
-        "direct", "Provare senza dock o adattatori",
-        "Un collegamento diretto può aiutare a isolare un problema nella catena di collegamento.",
-        "Se disponi di una connessione compatibile, collega il proiettore direttamente "
-        "al computer. Se non è possibile o è già collegato direttamente, salta questa prova.",
+        "direct", "Try without a dock or adapter",
+        "A direct connection may help isolate a problem along the connection path.",
+        "If you have a compatible connection, connect the projector directly "
+        "to the computer. If this is not possible or it is already connected directly, skip this step.",
     ),
     "cable": Step(
-        "cable", "Provare un altro cavo",
-        "Un confronto con un altro cavo aiuta a circoscrivere il problema; i dati attuali non provano un guasto.",
-        "Se ne hai uno disponibile, prova un altro cavo compatibile. Altrimenti salta questa prova.",
+        "cable", "Try another cable",
+        "Comparing with another cable helps narrow down the problem; the current data do not prove a fault.",
+        "If you have one available, try another compatible cable. Otherwise, skip this step.",
     ),
     "activate": Step(
-        "activate", "Attivare l'uscita nelle impostazioni Schermi",
-        "Linux rileva il display selezionato ma segnala la sua uscita come disabilitata.",
-        "Apri le impostazioni Schermi del desktop, identifica il proiettore e abilitalo. "
-        "Mantieni acceso anche lo schermo del computer. Applica e usa l'eventuale conferma del desktop.",
+        "activate", "Enable the output in Display settings",
+        "Linux detects the selected display but reports its output as disabled.",
+        "Open your desktop's Display settings, identify the projector and enable it. "
+        "Keep the computer's screen on as well. Apply the change and use the desktop's confirmation prompt if offered.",
     ),
     "presentation": Step(
-        "presentation", "Mostrare la presentazione sul proiettore",
-        "Vedi il desktop: il collegamento produce un'immagine, ma il contenuto potrebbe essere sull'altro schermo.",
-        "Nelle impostazioni della presentazione seleziona lo schermo del proiettore, "
-        "oppure sposta la finestra su quello schermo e avvia la presentazione.",
+        "presentation", "Show the presentation on the projector",
+        "You can see the desktop: the connection produces an image, but the content may be on the other screen.",
+        "In your presentation settings, select the projector screen, "
+        "or move the window to that screen and start the presentation.",
     ),
     "mirror": Step(
-        "mirror", "Provare la duplicazione dello schermo",
-        "La duplicazione permette di verificare se il contenuto atteso compare anche sul proiettore.",
-        "Nelle impostazioni Schermi scegli Duplica o Rispecchia, se disponibile, "
-        "mantenendo attivo lo schermo del computer. Annota l'impostazione precedente "
-        "per poterla ripristinare e usa l'eventuale conferma del desktop.",
+        "mirror", "Try screen mirroring",
+        "Mirroring lets you check whether the expected content also appears on the projector.",
+        "In Display settings, choose Duplicate or Mirror, if available, "
+        "keeping the computer's screen active. Note the previous setting "
+        "so you can restore it, and use the desktop's confirmation prompt if offered.",
     ),
     "mode": Step(
-        "mode", "Provare un'altra modalità offerta dal desktop",
-        "L'uscita risulta attiva, ma BeamFix non conosce risoluzione e frequenza effettivamente in uso.",
-        "Nelle impostazioni Schermi del proiettore, annota la modalità attuale e prova "
-        "un'altra modalità tra quelle offerte dal desktop. Mantieni attivo lo schermo "
-        "del computer; se peggiora, ripristina la precedente. Salta se non ci sono alternative.",
+        "mode", "Try another mode offered by the desktop",
+        "The output appears active, but BeamFix does not know the resolution and refresh rate currently in use.",
+        "In the projector's Display settings, note the current mode and try "
+        "another mode offered by the desktop. Keep the computer's screen "
+        "active; if the result is worse, restore the previous mode. Skip if there are no alternatives.",
     ),
     "refresh": Step(
-        "refresh", "Ripetere la lettura dei dati",
-        "I dati sul display sono incompleti o sconosciuti: non bastano per scegliere una correzione.",
-        "Verifica di aver avviato BeamFix nella sessione Linux del computer collegato "
-        "al proiettore. Attendi qualche secondo e scegli Fatto per ripetere la lettura.",
+        "refresh", "Read the data again",
+        "Display data are incomplete or unknown: there is not enough information to choose a fix.",
+        "Check that you started BeamFix in the Linux session on the computer connected "
+        "to the projector. Wait a few seconds and choose Done to read the data again.",
     ),
 }
 
@@ -93,9 +93,9 @@ class Session:
 
 
 SYMPTOMS = {
-    "no_signal": "Il proiettore mostra Nessun segnale",
-    "black": "Lo schermo proiettato è nero",
-    "desktop": "Vedo il desktop, ma non la presentazione",
+    "no_signal": "The projector shows No signal",
+    "black": "The projected screen is black",
+    "desktop": "I can see the desktop, but not the presentation",
 }
 
 
@@ -136,10 +136,10 @@ def next_step(snapshot: Snapshot, target: str | None, symptom: str, tried: set[s
 def describe(snapshot: Snapshot, target: str | None) -> str:
     connector = target_connector(snapshot, target)
     if connector is None:
-        return "Display interessato non identificato."
-    status = {"connected": "collegato", "disconnected": "scollegato", "unknown": "collegamento sconosciuto"}
-    enabled = {"enabled": "uscita abilitata", "disabled": "uscita disabilitata", "unknown": "abilitazione sconosciuta"}
-    modes = "modalità non leggibili" if connector.modes is None else f"{len(connector.modes)} modalità elencate"
+        return "Target display not identified."
+    status = {"connected": "connected", "disconnected": "disconnected", "unknown": "connection unknown"}
+    enabled = {"enabled": "output enabled", "disabled": "output disabled", "unknown": "output state unknown"}
+    modes = "modes unreadable" if connector.modes is None else f"{len(connector.modes)} listed modes"
     return f"{connector.name!r}: {status[connector.status]}, {enabled[connector.enabled]}, {modes}."
 
 
@@ -151,7 +151,7 @@ def choose(prompt: str, options: list[tuple[str, str]], read: Callable[[str], st
     write(prompt)
     for index, (_, label) in enumerate(options, 1):
         write(f"  {index}. {label}")
-    write("  0. Chiudi e mostra il riepilogo")
+    write("  0. Exit and show the summary")
     while True:
         value = read("> ").strip()
         if value == "0":
@@ -160,18 +160,18 @@ def choose(prompt: str, options: list[tuple[str, str]], read: Callable[[str], st
             index = int(value) - 1
             if 0 <= index < len(options):
                 return options[index][0]
-        write("Inserisci il numero di una delle opzioni.")
+        write("Enter the number of one of the options.")
 
 
 def select_target(snapshot: Snapshot, read: Callable[[str], str], write: Callable[[str], None]) -> str | None:
     ports = candidates(snapshot)
     if not ports:
-        write("Nessuna uscita esterna identificabile nei dati disponibili.")
+        write("No external output can be identified from the available data.")
         return None
     options = [(c.name, describe(snapshot, c.name)) for c in ports]
-    options.append(("", "Non so quale sia / il proiettore non è nell'elenco"))
-    write("I nomi delle uscite non identificano con certezza il dispositivo o il cavo fisico.")
-    return choose("Quale uscita corrisponde al proiettore? Puoi confrontarla con le impostazioni Schermi.", options, read, write) or None
+    options.append(("", "I am not sure / the projector is not listed"))
+    write("Output names do not reliably identify the device or physical cable.")
+    return choose("Which output corresponds to the projector? You can compare it with Display settings.", options, read, write) or None
 
 
 def insufficient(session: Session) -> bool:
@@ -186,30 +186,30 @@ def insufficient(session: Session) -> bool:
 
 def summarize(session: Session, write: Callable[[str], None]) -> int:
     labels = {
-        "resolved": "Immagine attesa confermata dall'utente.",
-        "unresolved": "Problema ancora presente: le prove guidate disponibili sono terminate.",
-        "insufficient": "Dati insufficienti per proseguire con una diagnosi mirata.",
-        "interrupted": "Percorso interrotto; soluzione non confermata.",
+        "resolved": "Expected image confirmed by the user.",
+        "unresolved": "The problem remains: there are no more guided steps available.",
+        "insufficient": "Insufficient data to continue with targeted diagnostics.",
+        "interrupted": "Troubleshooting interrupted; resolution not confirmed.",
     }
-    write("\nRiepilogo — " + labels[session.outcome])
+    write("\nSummary — " + labels[session.outcome])
     for number, attempt in enumerate(session.attempts, 1):
-        state = "eseguita" if attempt.performed else "saltata, non verificata"
+        state = "performed" if attempt.performed else "skipped, not verified"
         write(f"{number}. {attempt.step.title}: {state}.")
         if attempt.performed:
-            write("   Prima: " + attempt.before)
+            write("   Before: " + attempt.before)
             if attempt.after is not None:
-                write("   Dopo: " + attempt.after)
-            write("   Esito visivo: " + (attempt.observation or "non confermato"))
+                write("   After: " + attempt.after)
+            write("   Visual result: " + (attempt.observation or "not confirmed"))
     if not session.attempts:
-        write("Nessuna prova eseguita.")
+        write("No steps performed.")
     if session.snapshot is not None:
-        write("Ultima lettura: " + describe(session.snapshot, session.target))
+        write("Latest reading: " + describe(session.snapshot, session.target))
         if session.snapshot.errors:
-            write("La raccolta contiene dati mancanti; usa beamfix doctor per i dettagli.")
+            write("Some data are missing; run beamfix doctor for details.")
     if session.outcome != "resolved":
-        write("Le prove fallite o saltate non escludono un guasto a cavo, adattatore o proiettore.")
-        write("Per approfondire: conserva questo riepilogo e il report di beamfix doctor --json.")
-    write("BeamFix non ha applicato modifiche né salvato report automaticamente.")
+        write("Failed or skipped steps do not rule out a fault in the cable, adapter or projector.")
+        write("For further investigation, keep this summary and the report from beamfix doctor --json.")
+    write("BeamFix has not applied changes or saved reports automatically.")
     return 0 if session.outcome == "resolved" else (1 if session.outcome == "unresolved" else 2)
 
 
@@ -223,24 +223,24 @@ def run(
     read = read or input
     write = write or print
     session = Session()
-    write("BeamFix — percorso guidato: proiettore collegato, immagine assente o inattesa")
-    write("Ti proporrò una prova alla volta. Le modifiche nelle impostazioni le esegui tu; "
-          "BeamFix rilegge i dati e chiede cosa vedi. Puoi saltare una prova o chiudere con 0.")
+    write("BeamFix — guided troubleshooting: projector connected, image missing or unexpected")
+    write("I will suggest one step at a time. You make any changes in your settings; "
+          "BeamFix reads the data again and asks what you see. You can skip a step or exit with 0.")
     try:
-        session.symptom = choose("Che cosa vedi sul proiettore?", list(SYMPTOMS.items()), read, write)
+        session.symptom = choose("What do you see on the projector?", list(SYMPTOMS.items()), read, write)
         session.snapshot = snapshot_reader()
         session.target = select_target(session.snapshot, read, write)
         while True:
-            write("\nStato osservato: " + describe(session.snapshot, session.target))
+            write("\nObserved state: " + describe(session.snapshot, session.target))
             tried = {a.step.code for a in session.attempts}
             step = next_step(session.snapshot, session.target, session.symptom, tried)
             if step is None:
                 session.outcome = "insufficient" if insufficient(session) else "unresolved"
                 break
-            write("\nProva: " + step.title)
-            write("Perché: " + step.reason)
+            write("\nStep: " + step.title)
+            write("Why: " + step.reason)
             write(step.instruction)
-            action = choose("Quando sei pronto:", [("done", "Fatto: rileggi lo stato"), ("skip", "Salta questa prova")], read, write)
+            action = choose("When you are ready:", [("done", "Done: read the state again"), ("skip", "Skip this step")], read, write)
             attempt = Attempt(step, action == "done", describe(session.snapshot, session.target))
             session.attempts.append(attempt)
             if action == "skip":
@@ -257,19 +257,19 @@ def run(
             ) or (
                 newly_connected and current_target is not None and current_target.status != "connected"
             ):
-                write("L'elenco dei collegamenti è cambiato: identifica di nuovo il proiettore.")
+                write("The connection list has changed: identify the projector again.")
                 session.target = None
                 session.target = select_target(session.snapshot, read, write)
             attempt.after = describe(session.snapshot, session.target)
-            write("Nuova lettura: " + attempt.after)
-            write("Lo stato di Linux, da solo, non conferma che l'immagine sia visibile.")
-            observed = choose("Che cosa vedi adesso?", [
-                ("resolved", "Vedo l'immagine che volevo proiettare"),
+            write("New reading: " + attempt.after)
+            write("Linux state alone does not confirm that the image is visible.")
+            observed = choose("What do you see now?", [
+                ("resolved", "I can see the image I wanted to project"),
                 *SYMPTOMS.items(),
-                ("unverified", "Non posso verificare l'immagine"),
+                ("unverified", "I cannot verify the image"),
             ], read, write)
-            attempt.observation = "immagine attesa confermata" if observed == "resolved" else (
-                "non verificabile" if observed == "unverified" else SYMPTOMS[observed]
+            attempt.observation = "expected image confirmed" if observed == "resolved" else (
+                "cannot be verified" if observed == "unverified" else SYMPTOMS[observed]
             )
             if observed == "resolved":
                 session.outcome = "resolved"
@@ -279,5 +279,5 @@ def run(
                 break
             session.symptom = observed
     except (EOFError, KeyboardInterrupt, StopSession):
-        write("\nChiusura del percorso guidato.")
+        write("\nClosing guided troubleshooting.")
     return summarize(session, write)
