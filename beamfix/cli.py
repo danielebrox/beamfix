@@ -19,7 +19,12 @@ def main(argv: list[str] | None = None) -> int:
     commands = parser.add_subparsers(dest="command", required=True)
     doctor = commands.add_parser("doctor", help="Legge lo stato del sistema senza modificarlo.")
     doctor.add_argument("--json", action="store_true", help="Report strutturato per sviluppo e assistenza.")
+    commands.add_parser("troubleshoot", help="Guida le prove quando il proiettore non mostra l'immagine attesa.")
     args = parser.parse_args(argv)
+    if args.command == "troubleshoot":
+        from .troubleshoot import run
+
+        return run()
     snapshot = collect()
     findings = diagnose(snapshot)
     uncertain = any(c.status == "unknown" for c in snapshot.connectors)

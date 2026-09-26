@@ -5,6 +5,32 @@
 `cli.py` presenta i risultati o esporta il JSON su stdout.
 `models.py` definisce dati e risultati condivisi.
 
+## Percorso guidato
+
+`troubleshoot.py` aggiunge il comando interattivo mantenendo `doctor` e il suo
+schema JSON invariati. `next_step` sceglie una prova usando lo snapshot, l'uscita
+selezionata, il sintomo dichiarato e i codici delle prove già eseguite o saltate;
+non legge il sistema e non esegue modifiche. L'ordine delle prove è deterministico.
+
+`run` gestisce domande, letture e riepilogo. Collector e funzioni di input/output
+sono sostituibili nei test. Dopo ogni prova dichiarata eseguita acquisisce uno
+snapshot e chiede l'esito visivo. Lo stato DRM non genera mai da solo un risultato
+di successo. Le prove saltate sono registrate come non verificate.
+
+La scelta dell'uscita è esplicita anche quando ne appare una sola. Se un'uscita
+scompare o il collegamento passa a un'altra porta, il percorso richiede una nuova
+selezione. Il nome del connettore serve soltanto a seguire la sessione: non è
+un'identità persistente del proiettore e non permette di rilevare la sostituzione
+di due dispositivi sulla stessa porta fra due letture.
+
+Il numero di prove è limitato: ogni codice viene proposto al massimo una volta
+nella sessione, anche se cambia uscita. I dati sconosciuti richiedono una rilettura;
+se restano insufficienti il percorso si ferma senza dedurre un guasto. EOF, Ctrl+C
+e l'opzione `0` producono un riepilogo con esito non confermato. Nulla viene
+salvato automaticamente; le modifiche manuali restano sotto il controllo dell'utente.
+
+## Raccolta e test
+
 Il backend iniziale è in sola lettura. I test iniettano un albero DRM temporaneo:
 è possibile simulare porte scollegate, dati mancanti e più GPU senza hardware.
 Gli stati sconosciuti restano distinti da «scollegato»; le modalità non leggibili
