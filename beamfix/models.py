@@ -4,12 +4,28 @@ from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
+class VideoMode:
+    width: int
+    height: int
+    refresh_hz: float
+
+
+@dataclass(frozen=True)
+class CurrentMode:
+    state: str  # listed, inactive, unknown; never implies visible projection
+    source: str
+    reason: str
+    mode: VideoMode | None = None
+
+
+@dataclass(frozen=True)
 class Connector:
     name: str
     kind: str
     status: str
     enabled: str
     modes: tuple[str, ...] | None
+    current_mode: CurrentMode | None = None
 
 
 @dataclass(frozen=True)

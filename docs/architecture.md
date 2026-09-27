@@ -2,6 +2,7 @@
 
 `collect.py` reads kernel observations and produces a `Snapshot`.
 `diagnose.py` applies deterministic rules to that model without accessing the system.
+`desktop.py` optionally enriches the `doctor` snapshot with current KDE modes.
 `cli.py` presents results or exports JSON to stdout.
 `models.py` defines shared data and result types.
 
@@ -59,6 +60,37 @@ drivers or modifying system files is outside the scope of the initial MVP.
 
 To add a rule, use a stable code, state the evidence, make uncertainty explicit
 and add a test case that distinguishes a fault from a normal state.
+
+## Current-mode observation
+
+For `doctor`, `collect_doctor` first runs the DRM collector, then optionally reads
+KDE using `kscreen-doctor --json`. Other desktops and nongraphical sessions do not
+launch KScreen. The subprocess has no input, discards stderr and has a five-second
+timeout. Missing tools, failed queries and malformed data produce explicit
+unverified results without losing the DRM snapshot. The guided troubleshooter
+continues to use the DRM collector alone.
+
+The parser follows KDE's [configuration serializer](https://github.com/KDE/libkscreen/blob/master/src/configserializer.cpp):
+`outputs`, `name`, `connected`, `enabled`, `currentModeId`, and the mode list's
+`id`, `size` and `refreshRate`. It uses mode pixel dimensions, not the logical or
+rotated output geometry. Refresh values are retained numerically in Hz and shown
+to two decimals. Mode identity, not rounded rates or preferred-mode status,
+determines the current resolution/refresh pair.
+
+Connector matching strips only the Linux `cardN-` prefix. Both sides must have
+exactly one match; duplicate names across GPUs, duplicate KDE outputs and X11
+aliases remain unverified. Contradictory DRM/KDE state also remains unverified;
+the two observations are not atomic and the connection may have changed.
+Disabled/disconnected outputs never expose a retained mode as currently active.
+Missing, duplicate or invalid current modes are unknown, not proof of incompatibility.
+
+`Connector.current_mode` is an additive JSON v1 field with `state` (`listed`,
+`inactive` or `unknown`), `source`, `reason`, and optional `mode` containing `width`,
+`height` and `refresh_hz`. Existing `modes` still means the DRM names, without Hz.
+An unknown current-mode observation returns exit code `2`; a listed mode never
+sets `visual_confirmation` or proves the image is visible. No unsupported/red
+classification is inferred from the available KDE data, including custom modes.
+Raw desktop responses and unrelated identity/profile data are discarded.
 
 ## Terminal presentation
 

@@ -5,7 +5,7 @@ import json
 from dataclasses import asdict
 
 from . import __version__
-from .collect import collect
+from .desktop import collect_doctor as collect
 from .diagnose import diagnose
 from .terminal import render_doctor
 
@@ -28,7 +28,8 @@ def main(argv: list[str] | None = None) -> int:
         return run(plain=args.plain)
     snapshot = collect()
     findings = diagnose(snapshot)
-    uncertain = any(c.status == "unknown" for c in snapshot.connectors)
+    uncertain = any(c.status == "unknown" or (c.current_mode is not None and c.current_mode.state == "unknown")
+                    for c in snapshot.connectors)
     exit_code = 2 if snapshot.errors or uncertain else (1 if any(f.severity == "warning" for f in findings) else 0)
     if args.json:
         print(json.dumps({

@@ -36,6 +36,15 @@ Simulated tests do not establish hardware compatibility or successful projection
 - Narrow-terminal wrapping, safe device text and unchanged JSON output.
 - `--plain`, `NO_COLOR` and `TERM=dumb` support without new runtime dependencies.
 
+### 0.2.3 — Current display modes on KDE (implemented)
+
+- Read configured pixel resolution and Hz together through `kscreen-doctor --json`.
+- Green modes listed by KDE, inactive outputs, and yellow unverified observations.
+- Unique output matching; no guesses across GPU duplicates or connector aliases.
+- Optional read-only backend with timeout and preserved basic DRM diagnostics.
+- Additive `current_mode` JSON data; incomplete mode observations return `2`.
+- Checked on KDE/Wayland; other desktops and unmatched KDE/X11 names remain unverified.
+
 ## 0.3 — First backend for applying fixes
 
 Choose a single desktop environment after the first test on the development

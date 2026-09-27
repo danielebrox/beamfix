@@ -7,7 +7,7 @@
 <rect x="24" y="78" width="664" height="1032" rx="10" fill="#1b2530" stroke="#344454"/>
 <text x="42" y="103" fill="#a8b5c5" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">$ beamfix doctor</text>
 <text x="42" y="157" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
-<text x="60" y="157" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">BEAMFIX / v0.2.2</text>
+<text x="60" y="157" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">BEAMFIX / v0.2.3</text>
 <text x="42" y="179" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
 <text x="60" y="179" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">Display health check</text>
 <text x="42" y="201" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
@@ -43,31 +43,45 @@
 <text x="42" y="619" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
 <text x="60" y="619" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Output: enabled</text>
 <text x="42" y="641" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
-<text x="60" y="641" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Available modes: 1920x1080</text>
+<text x="60" y="641" fill="#a6d79a" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Current mode: 1920 x 1080 @ 60.00 Hz</text>
+<text x="42" y="663" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="663" fill="#a6d79a" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">[LISTED] Current mode is listed as available by KDE.</text>
 <text x="42" y="685" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
-<text x="60" y="685" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">card0-HDMI-A-1 / external output</text>
-<text x="42" y="707" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
-<text x="60" y="707" fill="#a6d79a" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">[CONNECTED] Connection reported by Linux</text>
+<text x="60" y="685" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Available modes: 1920x1080</text>
 <text x="42" y="729" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
-<text x="60" y="729" fill="#e8c181" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Output: disabled</text>
+<text x="60" y="729" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">card0-HDMI-A-1 / external output</text>
 <text x="42" y="751" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
-<text x="60" y="751" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Available modes: 1920x1080, 1280x720</text>
+<text x="60" y="751" fill="#a6d79a" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">[CONNECTED] Connection reported by Linux</text>
 <text x="42" y="773" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
-<text x="60" y="773" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Listed modes are not necessarily the mode currently in use.</text>
+<text x="60" y="773" fill="#e8c181" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Output: disabled</text>
+<text x="42" y="795" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="795" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Current mode: Inactive</text>
 <text x="42" y="817" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
-<text x="60" y="817" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">SYSTEM</text>
+<text x="60" y="817" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Available modes: 1920x1080, 1280x720</text>
 <text x="42" y="839" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
-<text x="60" y="839" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">System: Linux / kernel 6.16</text>
+<text x="60" y="839" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Listed modes are not necessarily the mode currently in use.</text>
 <text x="42" y="861" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
-<text x="60" y="861" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Session: wayland / KDE</text>
+<text x="60" y="861" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Current mode: configured pixel resolution and Hz, not desktop</text>
 <text x="42" y="883" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
-<text x="60" y="883" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">GPU: card0 / amdgpu</text>
+<text x="60" y="883" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">scaling or live refresh measurements.</text>
+<text x="42" y="905" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="905" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Listed by KDE does not guarantee that the projected image is</text>
 <text x="42" y="927" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
-<text x="60" y="927" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">No changes applied. Image quality requires visual confirmation.</text>
+<text x="60" y="927" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">visible or correct.</text>
+<text x="42" y="971" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="971" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">SYSTEM</text>
+<text x="42" y="993" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="993" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">System: Linux / kernel 6.16</text>
+<text x="42" y="1015" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="1015" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Session: wayland / KDE</text>
+<text x="42" y="1037" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="1037" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">GPU: card0 / amdgpu</text>
+<text x="42" y="1081" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="1081" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">No changes applied. Image quality requires visual confirmation.</text>
 <rect x="710" y="78" width="664" height="1032" rx="10" fill="#1b2530" stroke="#344454"/>
 <text x="728" y="103" fill="#a8b5c5" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">$ beamfix troubleshoot</text>
 <text x="728" y="157" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
-<text x="746" y="157" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">BEAMFIX / v0.2.2</text>
+<text x="746" y="157" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">BEAMFIX / v0.2.3</text>
 <text x="728" y="179" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
 <text x="746" y="179" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">Guided projector troubleshooting</text>
 <text x="728" y="201" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
