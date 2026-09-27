@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1398" height="1130" viewBox="0 0 1398 1130" role="img" aria-labelledby="title desc">
+<title id="title">BeamFix terminal preview</title>
+<desc id="desc">Two example terminal sessions with simulated display data: a diagnostic report and guided troubleshooting for a disabled projector output.</desc>
+<rect width="1398" height="1130" fill="#111820"/>
+<text x="24" y="35" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">BEAMFIX  /  TERMINAL PREVIEW</text>
+<text x="24" y="60" fill="#a8b5c5" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Example sessions with simulated display data. Colours follow your terminal theme.</text>
+<rect x="24" y="78" width="664" height="1032" rx="10" fill="#1b2530" stroke="#344454"/>
+<text x="42" y="103" fill="#a8b5c5" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">$ beamfix doctor</text>
+<text x="42" y="157" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="157" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">BEAMFIX / v0.2.2</text>
+<text x="42" y="179" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="179" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">Display health check</text>
+<text x="42" y="201" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="201" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">────────────────────────────────────────────────────────────────</text>
+<text x="42" y="223" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="223" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Read-only diagnostics. No settings are changed.</text>
+<text x="42" y="267" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="267" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">AT A GLANCE</text>
+<text x="42" y="289" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="289" fill="#e8c181" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">[CHECK] 1 warning to review.</text>
+<text x="42" y="311" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="311" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">An enabled output does not confirm a visible image.</text>
+<text x="42" y="355" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="355" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">NEXT STEPS</text>
+<text x="42" y="377" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="377" fill="#e8c181" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">[CHECK] The connector is connected but reported as disabled by</text>
+<text x="42" y="399" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="399" fill="#e8c181" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Linux.</text>
+<text x="42" y="421" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="421" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Output: card0-HDMI-A-1</text>
+<text x="42" y="443" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="443" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Try: This may be intentional. If you want to use this screen,</text>
+<text x="42" y="465" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="465" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">check that it is enabled in Display settings.</text>
+<text x="42" y="509" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="509" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">Guide: beamfix troubleshoot</text>
+<text x="42" y="553" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="553" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">DISPLAYS</text>
+<text x="42" y="575" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="575" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">card0-eDP-1 / built-in screen</text>
+<text x="42" y="597" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="597" fill="#a6d79a" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">[CONNECTED] Connection reported by Linux</text>
+<text x="42" y="619" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="619" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Output: enabled</text>
+<text x="42" y="641" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="641" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Available modes: 1920x1080</text>
+<text x="42" y="685" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="685" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">card0-HDMI-A-1 / external output</text>
+<text x="42" y="707" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="707" fill="#a6d79a" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">[CONNECTED] Connection reported by Linux</text>
+<text x="42" y="729" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="729" fill="#e8c181" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Output: disabled</text>
+<text x="42" y="751" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="751" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Available modes: 1920x1080, 1280x720</text>
+<text x="42" y="773" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="773" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Listed modes are not necessarily the mode currently in use.</text>
+<text x="42" y="817" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="817" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">SYSTEM</text>
+<text x="42" y="839" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="839" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">System: Linux / kernel 6.16</text>
+<text x="42" y="861" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="861" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Session: wayland / KDE</text>
+<text x="42" y="883" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="883" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">GPU: card0 / amdgpu</text>
+<text x="42" y="927" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="60" y="927" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">No changes applied. Image quality requires visual confirmation.</text>
+<rect x="710" y="78" width="664" height="1032" rx="10" fill="#1b2530" stroke="#344454"/>
+<text x="728" y="103" fill="#a8b5c5" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">$ beamfix troubleshoot</text>
+<text x="728" y="157" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="746" y="157" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">BEAMFIX / v0.2.2</text>
+<text x="728" y="179" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="746" y="179" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">Guided projector troubleshooting</text>
+<text x="728" y="201" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="746" y="201" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">────────────────────────────────────────────────────────────────</text>
+<text x="728" y="223" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="746" y="223" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">DESCRIBE / TRY / VERIFY</text>
+<text x="728" y="245" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="746" y="245" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">I will suggest one step at a time. You make any changes in your</text>
+<text x="728" y="267" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="746" y="267" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">settings; BeamFix reads the data again and asks what you see. You</text>
+<text x="728" y="289" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="746" y="289" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">can skip a step or exit with 0.</text>
+<text x="728" y="333" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="746" y="333" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">What do you see on the projector?</text>
+<text x="728" y="355" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">  [1] </text>
+<text x="782" y="355" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">The projector shows No signal</text>
+<text x="728" y="377" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">  [2] </text>
+<text x="782" y="377" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">The projected screen is black</text>
+<text x="728" y="399" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">  [3] </text>
+<text x="782" y="399" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">I can see the desktop, but not the presentation</text>
+<text x="728" y="421" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  [0] </text>
+<text x="782" y="421" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Exit and show the summary</text>
+<text x="728" y="443" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">  &gt; </text>
+<text x="764" y="443" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">1</text>
+<text x="728" y="465" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="746" y="465" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Output names do not reliably identify the device or physical</text>
+<text x="728" y="487" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="746" y="487" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">cable.</text>
+<text x="728" y="531" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="746" y="531" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">Which output corresponds to the projector? You can compare it with</text>
+<text x="728" y="553" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="746" y="553" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">Display settings.</text>
+<text x="728" y="575" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">  [1] </text>
+<text x="782" y="575" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">&#x27;card0-HDMI-A-1&#x27;: connected, output disabled, 2 listed modes.</text>
+<text x="728" y="597" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">  [2] </text>
+<text x="782" y="597" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">I am not sure / the projector is not listed</text>
+<text x="728" y="619" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  [0] </text>
+<text x="782" y="619" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Exit and show the summary</text>
+<text x="728" y="641" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">  &gt; </text>
+<text x="764" y="641" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">1</text>
+<text x="728" y="685" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="746" y="685" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">CURRENT DISPLAY</text>
+<text x="728" y="707" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="746" y="707" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Observed state: &#x27;card0-HDMI-A-1&#x27;: connected, output disabled, 2</text>
+<text x="728" y="729" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="746" y="729" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">listed modes.</text>
+<text x="728" y="773" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="746" y="773" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">TRY 01</text>
+<text x="728" y="795" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="746" y="795" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">Step: Enable the output in Display settings</text>
+<text x="728" y="839" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="746" y="839" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Why: Linux detects the selected display but reports its output as</text>
+<text x="728" y="861" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="746" y="861" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">disabled.</text>
+<text x="728" y="905" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="746" y="905" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">WHAT TO DO</text>
+<text x="728" y="927" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="746" y="927" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">│ </text>
+<text x="764" y="927" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Open your desktop&#x27;s Display settings, identify the projector and</text>
+<text x="728" y="949" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="746" y="949" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">│ </text>
+<text x="764" y="949" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">enable it. Keep the computer&#x27;s screen on as well. Apply the</text>
+<text x="728" y="971" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="746" y="971" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">│ </text>
+<text x="764" y="971" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">change and use the desktop&#x27;s confirmation prompt if offered.</text>
+<text x="728" y="1015" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  </text>
+<text x="746" y="1015" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">When you are ready:</text>
+<text x="728" y="1037" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">  [1] </text>
+<text x="782" y="1037" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Done: read the state again</text>
+<text x="728" y="1059" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">  [2] </text>
+<text x="782" y="1059" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Skip this step</text>
+<text x="728" y="1081" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">  [0] </text>
+<text x="782" y="1081" fill="#d9e0e8" font-family="monospace" font-size="15" font-weight="400" xml:space="preserve">Exit and show the summary</text>
+<text x="728" y="1103" fill="#83d7db" font-family="monospace" font-size="15" font-weight="700" xml:space="preserve">  &gt; </text>
+</svg>

@@ -28,6 +28,14 @@ Simulated tests do not establish hardware compatibility or successful projection
 - English as the working language for GitHub contributions.
 - Existing commands, diagnostic codes, JSON schema and exit codes preserved.
 
+### 0.2.2 — Clearer terminal interaction (implemented)
+
+- Terminal palette colours with explicit status labels and a plain-text fallback.
+- Diagnostic overview and next steps before hardware details.
+- Numbered choices and distinct reason, action and verification sections.
+- Narrow-terminal wrapping, safe device text and unchanged JSON output.
+- `--plain`, `NO_COLOR` and `TERM=dumb` support without new runtime dependencies.
+
 ## 0.3 — First backend for applying fixes
 
 Choose a single desktop environment after the first test on the development

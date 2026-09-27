@@ -206,7 +206,7 @@ class GuidedSessionTests(unittest.TestCase):
     def test_cli_dispatch_and_exit_code(self):
         with patch("beamfix.troubleshoot.run", return_value=1) as guided:
             self.assertEqual(main(["troubleshoot"]), 1)
-        guided.assert_called_once_with()
+        guided.assert_called_once_with(plain=False)
 
     def test_existing_doctor_still_available(self):
         with patch("beamfix.cli.collect", return_value=snapshot(port())), contextlib.redirect_stdout(io.StringIO()) as output:

@@ -60,6 +60,28 @@ drivers or modifying system files is outside the scope of the initial MVP.
 To add a rule, use a stable code, state the evidence, make uncertainty explicit
 and add a test case that distinguishes a fault from a normal state.
 
+## Terminal presentation
+
+`terminal.py` owns terminal rendering, separate from diagnostic and troubleshooting
+rules. It uses standard ANSI palette colours rather than forcing a background or
+fixed RGB theme. A shared `Terminal` renders headings, status labels, choices,
+wrapped text and action instructions. Reports show the overall result and next
+steps before connector and system details.
+
+Colour is automatic only on a terminal and is disabled by `NO_COLOR`,
+`TERM=dumb`, `--plain` or redirected output. Decorative characters fall back to
+ASCII when the output encoding cannot represent them. `--plain` works before or
+after the subcommand. The JSON path bypasses the renderer entirely.
+
+All device and environment text is sanitized before styling. Line wrapping counts
+terminal cells, including wide characters and combining marks, and preserves long
+connector names by wrapping rather than truncating them. Labels carry status even
+without colour; an enabled or connected output never becomes visual confirmation.
+
+Presentation tests cover narrow terminals, colour and plain output, unsupported
+encodings, control characters, clean JSON and guided success/interruption paths.
+The README preview uses simulated data, not a successful hardware projection.
+
 ## Language and compatibility
 
 User-facing text, documentation and GitHub contributions use English. The 0.2.1

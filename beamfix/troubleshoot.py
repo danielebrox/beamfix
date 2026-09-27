@@ -3,8 +3,10 @@
 from collections.abc import Callable
 from dataclasses import dataclass, field
 
+from . import __version__
 from .collect import collect
 from .models import Connector, Snapshot
+from .terminal import Terminal
 
 
 @dataclass(frozen=True)
@@ -147,23 +149,24 @@ class StopSession(Exception):
     pass
 
 
-def choose(prompt: str, options: list[tuple[str, str]], read: Callable[[str], str], write: Callable[[str], None]) -> str:
-    write(prompt)
+def choose(prompt: str, options: list[tuple[str, str]], read: Callable[[str], str], ui: Terminal) -> str:
+    ui.section(prompt)
     for index, (_, label) in enumerate(options, 1):
-        write(f"  {index}. {label}")
-    write("  0. Exit and show the summary")
+        ui.option(index, label)
+    ui.option(0, "Exit and show the summary")
     while True:
-        value = read("> ").strip()
+        value = read(ui.prompt()).strip()
         if value == "0":
             raise StopSession
         if value.isascii() and value.isdecimal() and len(value) <= len(str(len(options))):
             index = int(value) - 1
             if 0 <= index < len(options):
                 return options[index][0]
-        write("Enter the number of one of the options.")
+        ui.status("TRY AGAIN", "Enter the number of one of the options.", "warning")
 
 
-def select_target(snapshot: Snapshot, read: Callable[[str], str], write: Callable[[str], None]) -> str | None:
+def select_target(snapshot: Snapshot, read: Callable[[str], str], ui: Terminal) -> str | None:
+    write = ui.text
     ports = candidates(snapshot)
     if not ports:
         write("No external output can be identified from the available data.")
@@ -171,7 +174,7 @@ def select_target(snapshot: Snapshot, read: Callable[[str], str], write: Callabl
     options = [(c.name, describe(snapshot, c.name)) for c in ports]
     options.append(("", "I am not sure / the projector is not listed"))
     write("Output names do not reliably identify the device or physical cable.")
-    return choose("Which output corresponds to the projector? You can compare it with Display settings.", options, read, write) or None
+    return choose("Which output corresponds to the projector? You can compare it with Display settings.", options, read, ui) or None
 
 
 def insufficient(session: Session) -> bool:
@@ -184,17 +187,21 @@ def insufficient(session: Session) -> bool:
     )
 
 
-def summarize(session: Session, write: Callable[[str], None]) -> int:
+def summarize(session: Session, ui: Terminal) -> int:
+    write = ui.text
     labels = {
         "resolved": "Expected image confirmed by the user.",
         "unresolved": "The problem remains: there are no more guided steps available.",
         "insufficient": "Insufficient data to continue with targeted diagnostics.",
         "interrupted": "Troubleshooting interrupted; resolution not confirmed.",
     }
-    write("\nSummary — " + labels[session.outcome])
+    ui.section("SUMMARY")
+    tone = "ok" if session.outcome == "resolved" else "warning"
+    ui.status("CONFIRMED" if session.outcome == "resolved" else "NOT CONFIRMED", labels[session.outcome], tone)
+    ui.blank()
     for number, attempt in enumerate(session.attempts, 1):
         state = "performed" if attempt.performed else "skipped, not verified"
-        write(f"{number}. {attempt.step.title}: {state}.")
+        ui.text(f"{number}. {attempt.step.title}: {state}.", "title")
         if attempt.performed:
             write("   Before: " + attempt.before)
             if attempt.after is not None:
@@ -218,29 +225,32 @@ def run(
     snapshot_reader: Callable[[], Snapshot] | None = None,
     read: Callable[[str], str] | None = None,
     write: Callable[[str], None] | None = None,
+    plain: bool = False,
+    terminal: Terminal | None = None,
 ) -> int:
     snapshot_reader = snapshot_reader or collect
     read = read or input
-    write = write or print
+    ui = terminal or Terminal(write=write, plain=plain)
+    write = ui.text
     session = Session()
-    write("BeamFix — guided troubleshooting: projector connected, image missing or unexpected")
+    ui.banner("Guided projector troubleshooting", __version__)
+    ui.text("DESCRIBE  /  TRY  /  VERIFY", "accent")
     write("I will suggest one step at a time. You make any changes in your settings; "
           "BeamFix reads the data again and asks what you see. You can skip a step or exit with 0.")
     try:
-        session.symptom = choose("What do you see on the projector?", list(SYMPTOMS.items()), read, write)
+        session.symptom = choose("What do you see on the projector?", list(SYMPTOMS.items()), read, ui)
         session.snapshot = snapshot_reader()
-        session.target = select_target(session.snapshot, read, write)
+        session.target = select_target(session.snapshot, read, ui)
         while True:
-            write("\nObserved state: " + describe(session.snapshot, session.target))
+            ui.section("CURRENT DISPLAY")
+            write("Observed state: " + describe(session.snapshot, session.target))
             tried = {a.step.code for a in session.attempts}
             step = next_step(session.snapshot, session.target, session.symptom, tried)
             if step is None:
                 session.outcome = "insufficient" if insufficient(session) else "unresolved"
                 break
-            write("\nStep: " + step.title)
-            write("Why: " + step.reason)
-            write(step.instruction)
-            action = choose("When you are ready:", [("done", "Done: read the state again"), ("skip", "Skip this step")], read, write)
+            ui.step(len(session.attempts) + 1, step.title, step.reason, step.instruction)
+            action = choose("When you are ready:", [("done", "Done: read the state again"), ("skip", "Skip this step")], read, ui)
             attempt = Attempt(step, action == "done", describe(session.snapshot, session.target))
             session.attempts.append(attempt)
             if action == "skip":
@@ -259,15 +269,16 @@ def run(
             ):
                 write("The connection list has changed: identify the projector again.")
                 session.target = None
-                session.target = select_target(session.snapshot, read, write)
+                session.target = select_target(session.snapshot, read, ui)
             attempt.after = describe(session.snapshot, session.target)
+            ui.section("VERIFY THE RESULT")
             write("New reading: " + attempt.after)
             write("Linux state alone does not confirm that the image is visible.")
             observed = choose("What do you see now?", [
                 ("resolved", "I can see the image I wanted to project"),
                 *SYMPTOMS.items(),
                 ("unverified", "I cannot verify the image"),
-            ], read, write)
+            ], read, ui)
             attempt.observation = "expected image confirmed" if observed == "resolved" else (
                 "cannot be verified" if observed == "unverified" else SYMPTOMS[observed]
             )
@@ -279,5 +290,6 @@ def run(
                 break
             session.symptom = observed
     except (EOFError, KeyboardInterrupt, StopSession):
-        write("\nClosing guided troubleshooting.")
-    return summarize(session, write)
+        ui.blank()
+        write("Closing guided troubleshooting.")
+    return summarize(session, ui)

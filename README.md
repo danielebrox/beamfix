@@ -3,9 +3,14 @@
 Local diagnostics for monitors and projectors on Linux. The goal is a simple
 workflow: connect the projector, run BeamFix, try a fix and confirm the result.
 
-**Status: guided troubleshooting, v0.2.1.** The `doctor` command collects data and
+**Status: guided troubleshooting, v0.2.2.** The `doctor` command collects data and
 reports potential issues; `troubleshoot` guides one step at a time and checks the
 outcome with the user. Automatic fixes and a graphical interface are on the roadmap.
+
+![BeamFix diagnostic report and guided troubleshooting](docs/images/cli-preview.svg)
+
+*Example terminal output using simulated display data. Actual colours follow your
+terminal theme.*
 
 ## Quick start
 
@@ -34,6 +39,32 @@ Installation may download build tools; BeamFix itself runs offline. If you have
 already installed an earlier version, run `.venv/bin/python -m pip install .`
 again to update the command in the virtual environment. Running
 `python3 -m beamfix` from the repository directory uses the local source directly.
+
+## Terminal presentation
+
+The CLI uses your terminal's colour palette, with clear section headings,
+numbered choices and wrapped text. Diagnostic reports put the overall result and
+next steps before hardware details. Guided checks separate the reason for each
+step, what to do, and verification of the result.
+
+- Cyan highlights headings, choices and the next action.
+- Amber marks warnings, unknown data and unconfirmed outcomes.
+- Green marks a detected connection or an image explicitly confirmed by the user;
+  the accompanying label always says which one.
+- Status labels remain meaningful without colour. No special fonts are required.
+
+Colours are enabled automatically in a terminal. Redirected or piped output is
+plain text. Set `NO_COLOR` to disable colour, or pass `--plain` to also remove
+decorative characters:
+
+```bash
+python3 -m beamfix doctor --plain
+python3 -m beamfix troubleshoot --plain
+```
+
+`TERM=dumb` also selects plain output. JSON output is always unstyled. The CLI
+keeps normal terminal scrolling and numbered input; it does not clear the screen
+or require an additional terminal UI library.
 
 ## Guided troubleshooting: projector connected, image missing or unexpected
 
