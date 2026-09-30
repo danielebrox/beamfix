@@ -45,6 +45,29 @@ Simulated tests do not establish hardware compatibility or successful projection
 - Additive `current_mode` JSON data; incomplete mode observations return `2`.
 - Checked on KDE/Wayland; other desktops and unmatched KDE/X11 names remain unverified.
 
+### 0.2.4 — Current modes in guided troubleshooting (implemented)
+
+- Read KDE modes during output selection and after every completed guided step.
+- Include configured resolution and refresh rate in before/after summaries.
+- Adapt manual mode-change instructions to the selected output's observed mode.
+- Keep basic guided checks available when current-mode data cannot be obtained.
+- Preserve explicit visual confirmation and existing troubleshooting exit codes.
+- Simulated coverage for changing modes, missing observations and backend refresh.
+
+Real-projector field validation remains open; these changes do not apply settings.
+
+### 0.2.5 — Standard Wayland observation (implemented)
+
+- Desktop-independent `wl_output` reading through optional `wayland-info`.
+- Distinguish a Wayland `reported` mode from a KDE `listed` mode in CLI and JSON.
+- Preserve KDE's richer response; use Wayland when its query is unavailable.
+- Conservative matching, DRM state checks, timeouts and explicit unknown states.
+- Integrate reported modes into guided instructions and before/after summaries.
+- Verified both paths on KDE/Wayland; simulated coverage for other desktops.
+
+Real GNOME, Hyprland and Cinnamon Wayland sessions remain to be tested. A generic
+X11/RandR backend and shared Wayland output-management support remain future work.
+
 ## 0.3 — First backend for applying fixes
 
 Choose a single desktop environment after the first test on the development

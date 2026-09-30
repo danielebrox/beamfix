@@ -1,4 +1,4 @@
-"""Optional read-only KDE mode observation; never applies display settings."""
+"""Read-only mode observation: KDE when available, standard Wayland otherwise."""
 
 import json
 import math
@@ -10,6 +10,7 @@ from dataclasses import replace
 
 from .collect import collect
 from .models import Connector, CurrentMode, Snapshot, VideoMode
+from .wayland import add_wayland_modes
 
 
 def _port(connector: Connector) -> str:
@@ -94,32 +95,44 @@ def apply_kde_modes(snapshot: Snapshot, data: object) -> Snapshot:
     return snapshot
 
 
-def add_current_modes(snapshot: Snapshot) -> Snapshot:
-    if not snapshot.connectors:
-        return snapshot
-    desktops = snapshot.desktop.upper().split(":")
-    if snapshot.system != "Linux" or "KDE" not in desktops or snapshot.session not in {"wayland", "x11"}:
-        return _unavailable(snapshot, "Current-mode detection is available in KDE desktop sessions only.")
+def _query_kde() -> tuple[object, str | None]:
     executable = shutil.which("kscreen-doctor")
     if executable is None:
-        return _unavailable(snapshot, "kscreen-doctor is not installed; basic Linux diagnostics remain available.")
+        return None, "kscreen-doctor is not installed; basic Linux diagnostics remain available."
     try:
         result = subprocess.run(
             [executable, "--json"], stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL, encoding="utf-8", timeout=5, check=False,
         )
     except subprocess.TimeoutExpired:
-        return _unavailable(snapshot, "KDE did not respond within 5 seconds; run doctor again in the desktop session.")
+        return None, "KDE did not respond within 5 seconds; read again in the desktop session."
     except (OSError, UnicodeError):
-        return _unavailable(snapshot, "KDE display data could not be read from this session.")
+        return None, "KDE display data could not be read from this session."
     if result.returncode != 0:
-        return _unavailable(snapshot, "KDE display data could not be read; run doctor from your desktop terminal.")
+        return None, "KDE display data could not be read; run BeamFix from your desktop terminal."
     try:
         data = json.loads(result.stdout)
     except (ValueError, RecursionError):
-        return _unavailable(snapshot, "KDE returned invalid display data.")
-    # Retain only mode and connection fields, not raw JSON, EDID or profile paths.
-    return apply_kde_modes(snapshot, data)
+        return None, "KDE returned invalid display data."
+    if not isinstance(data, dict) or not isinstance(data.get("outputs"), list):
+        return None, "KDE returned an unreadable display configuration."
+    return data, None
+
+
+def add_current_modes(snapshot: Snapshot) -> Snapshot:
+    if not snapshot.connectors:
+        return snapshot
+    reason = "Current-mode detection requires Wayland or a supported KDE session."
+    if snapshot.system == "Linux":
+        if "KDE" in snapshot.desktop.upper().split(":") and snapshot.session in {"wayland", "x11"}:
+            data, reason = _query_kde()
+            if reason is None:
+                # Preserve ambiguous or conflicting observations from a valid KDE
+                # response. A fallback must not conceal a possible hot-plug race.
+                return apply_kde_modes(snapshot, data)
+        if snapshot.session == "wayland":
+            return add_wayland_modes(snapshot)
+    return _unavailable(snapshot, reason)
 
 
 def collect_doctor() -> Snapshot:

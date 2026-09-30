@@ -136,8 +136,8 @@ class DesktopQueryTests(unittest.TestCase):
 
     @patch("beamfix.desktop.subprocess.run")
     def test_other_desktops_and_headless_sessions_do_not_spawn_kde(self, run):
-        for desktop, session, system in (("GNOME", "wayland", "Linux"), ("KDE", "tty", "Linux"),
-                                          ("KDE", "wayland", "Darwin"), ("NotKDE", "wayland", "Linux")):
+        for desktop, session, system in (("GNOME", "x11", "Linux"), ("KDE", "tty", "Linux"),
+                                          ("KDE", "wayland", "Darwin"), ("NotKDE", "x11", "Linux")):
             data = snapshot()
             data.desktop, data.session, data.system = desktop, session, system
             self.assertEqual(add_current_modes(data).connectors[0].current_mode.state, "unknown")

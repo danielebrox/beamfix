@@ -1,11 +1,12 @@
 import contextlib
 import io
 import unittest
+from dataclasses import replace
 from unittest.mock import Mock, patch
 
 from beamfix.cli import main
-from beamfix.models import Connector, Snapshot
-from beamfix.troubleshoot import next_step, run
+from beamfix.models import Connector, CurrentMode, Snapshot, VideoMode
+from beamfix.troubleshoot import describe, next_step, run
 
 
 def port(name="card0-HDMI-A-1", status="connected", enabled="enabled", modes=("1920x1080",), kind="external"):
@@ -14,6 +15,13 @@ def port(name="card0-HDMI-A-1", status="connected", enabled="enabled", modes=("1
 
 def snapshot(*ports, errors=()):
     return Snapshot("Linux", "test", "wayland", "KDE", connectors=list(ports), errors=list(errors))
+
+
+def with_mode(width=1920, height=1080, rate=60):
+    return replace(port(), current_mode=CurrentMode(
+        "listed", "kscreen-doctor", "Current mode is listed as available by KDE.",
+        VideoMode(width, height, rate),
+    ))
 
 
 class PlanningTests(unittest.TestCase):
@@ -55,6 +63,41 @@ class PlanningTests(unittest.TestCase):
         data = snapshot(port(name="card0-eDP-1", kind="internal"))
         self.assertEqual(next_step(data, None, "black", set()).code, "refresh")
 
+    def test_mode_step_uses_selected_output_and_fresh_rate(self):
+        selected = replace(with_mode(rate=59.94), name="card1-DP-1")
+        data = snapshot(with_mode(3840, 2160, 144), selected)
+        step = next_step(data, selected.name, "black", {"input", "mirror"})
+        self.assertEqual(step.code, "mode")
+        self.assertIn("1920 x 1080 @ 59.94 Hz", step.reason)
+        self.assertIn("still 1920 x 1080 @ 59.94 Hz", step.instruction)
+        self.assertNotIn("3840", step.instruction)
+        self.assertNotIn("does not know", step.reason)
+
+    def test_unverified_mode_keeps_manual_guidance(self):
+        for observation in (None, CurrentMode("unknown", "kscreen-doctor", "KDE unavailable.")):
+            with self.subTest(observation=observation):
+                step = self.plan(replace(port(), current_mode=observation), tried={"input", "mirror"})
+                self.assertEqual(step.code, "mode")
+                self.assertIn("does not know", step.reason)
+                self.assertIn("note the current mode", step.instruction)
+
+    def test_inactive_mode_does_not_show_retained_resolution(self):
+        c = replace(port(enabled="disabled"), current_mode=CurrentMode(
+            "inactive", "kscreen-doctor", "Disabled", VideoMode(1920, 1080, 60)))
+        self.assertEqual(self.plan(c).code, "activate")
+        description = describe(snapshot(c), c.name)
+        self.assertIn("Current mode: inactive", description)
+        self.assertNotIn("60.00 Hz", description)
+
+    def test_unknown_mode_shows_reason_without_retained_values(self):
+        c = replace(port(), current_mode=CurrentMode(
+            "unknown", "kscreen-doctor", "No unique KDE output matches this Linux connector.",
+            VideoMode(1920, 1080, 60)))
+        description = describe(snapshot(c), c.name)
+        self.assertIn("Current mode: unverified", description)
+        self.assertIn("No unique KDE output", description)
+        self.assertNotIn("60.00 Hz", description)
+
 
 class GuidedSessionTests(unittest.TestCase):
     def session(self, snapshots, answers):
@@ -83,6 +126,57 @@ class GuidedSessionTests(unittest.TestCase):
         self.assertIn("Expected image confirmed by the user", output)
         self.assertIn("Before: 'card0-HDMI-A-1': connected, output disabled", output)
         self.assertIn("After: 'card0-HDMI-A-1': connected, output enabled", output)
+
+    def test_summary_preserves_resolution_and_rate_before_and_after(self):
+        code, output, reads = self.session(
+            [snapshot(with_mode(3840, 2160, 30)), snapshot(with_mode(1920, 1080, 59.94))],
+            ["2", "1", "2", "2", "1", "1"],
+        )
+        self.assertEqual(code, 0)
+        self.assertEqual(reads, 2)
+        summary = " ".join(output.split("SUMMARY", 1)[1].split())
+        self.assertIn("Current mode: 3840 x 2160 @ 30.00 Hz", summary)
+        self.assertIn("Current mode: 1920 x 1080 @ 59.94 Hz", summary)
+        self.assertIn("Visual result: expected image confirmed", summary)
+
+    def test_known_mode_never_confirms_visual_success(self):
+        data = snapshot(with_mode())
+        code, output, _ = self.session([data, data], ["2", "1", "1", "5"])
+        self.assertEqual(code, 2)
+        self.assertIn("Visual result: cannot be verified", output)
+        self.assertNotIn("Expected image confirmed by the user", output)
+
+    def test_lost_mode_observation_does_not_reuse_previous_mode(self):
+        unknown = replace(port(), current_mode=CurrentMode("unknown", "kscreen-doctor", "KDE unavailable."))
+        code, output, _ = self.session(
+            [snapshot(with_mode()), snapshot(unknown)], ["2", "1", "1", "3", "2", "0"],
+        )
+        self.assertEqual(code, 2)
+        after = " ".join(output.split("New reading:", 1)[1].split("VERIFY", 1)[0].split())
+        self.assertIn("Current mode: unverified. KDE unavailable.", after)
+        self.assertIn("does not know the resolution", after)
+
+    def test_unavailable_kde_does_not_block_visual_confirmation(self):
+        unknown = replace(port(), current_mode=CurrentMode("unknown", "kscreen-doctor", "KDE unavailable."))
+        data = snapshot(unknown)
+        code, output, reads = self.session([data, data], ["2", "1", "1", "1"])
+        self.assertEqual(code, 0)
+        self.assertEqual(reads, 2)
+        self.assertIn("Expected image confirmed by the user", output)
+
+    def test_default_reader_refreshes_desktop_modes_after_action(self):
+        answers = iter(["2", "1", "1", "1"])
+        with patch("beamfix.desktop.collect", side_effect=[snapshot(port()), snapshot(port())]) as drm, \
+                patch("beamfix.desktop.add_current_modes", side_effect=[
+                    snapshot(with_mode(rate=30)), snapshot(with_mode(rate=60)),
+                ]) as desktop:
+            output = []
+            self.assertEqual(run(read=lambda _: next(answers), write=output.append), 0)
+        self.assertEqual(drm.call_count, 2)
+        self.assertEqual(desktop.call_count, 2)
+        text = " ".join("\n".join(output).split())
+        self.assertIn("@ 30.00 Hz", text)
+        self.assertIn("@ 60.00 Hz", text)
 
     def test_enabled_output_does_not_count_as_visual_success(self):
         code, output, reads = self.session(

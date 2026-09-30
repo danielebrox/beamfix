@@ -1,10 +1,10 @@
 """Guided, read-only troubleshooting with explicit human visual verification."""
 
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 from . import __version__
-from .collect import collect
+from .desktop import collect_doctor as collect
 from .models import Connector, Snapshot
 from .terminal import Terminal
 
@@ -132,7 +132,22 @@ def next_step(snapshot: Snapshot, target: str | None, symptom: str, tried: set[s
         codes = ["presentation", "mirror"]
     else:
         codes = ["input", "mirror", "mode", "reconnect", "direct", "cable"]
-    return next((STEPS[code] for code in codes if code not in tried), None)
+    step = next((STEPS[code] for code in codes if code not in tried), None)
+    if step is not None and step.code == "mode" and connector is not None:
+        observation = connector.current_mode
+        if observation is not None and observation.state in {"listed", "reported"} and observation.mode is not None:
+            mode = observation.mode
+            current = f"{mode.width} x {mode.height} @ {mode.refresh_hz:.2f} Hz"
+            return replace(step,
+                reason=(f"KDE reports {current}, listed as available." if observation.state == "listed" else
+                        f"Wayland reports {current}; the available mode list is not verified.")
+                       + " This does not confirm a correct projected image.",
+                instruction=f"In the projector's Display settings, check that the current mode is still {current} "
+                "and note it so you can restore it. Try another mode offered by the desktop, keeping the "
+                "computer's screen active. Use the desktop's confirmation prompt if offered; "
+                "if the result is worse, restore the previous mode. Skip if there are no alternatives.",
+            )
+    return step
 
 
 def describe(snapshot: Snapshot, target: str | None) -> str:
@@ -142,7 +157,16 @@ def describe(snapshot: Snapshot, target: str | None) -> str:
     status = {"connected": "connected", "disconnected": "disconnected", "unknown": "connection unknown"}
     enabled = {"enabled": "output enabled", "disabled": "output disabled", "unknown": "output state unknown"}
     modes = "modes unreadable" if connector.modes is None else f"{len(connector.modes)} listed modes"
-    return f"{connector.name!r}: {status[connector.status]}, {enabled[connector.enabled]}, {modes}."
+    description = f"{connector.name!r}: {status[connector.status]}, {enabled[connector.enabled]}, {modes}."
+    observation = connector.current_mode
+    if observation is not None and observation.state in {"listed", "reported"} and observation.mode is not None:
+        mode = observation.mode
+        source = "listed by KDE" if observation.state == "listed" else "reported by Wayland; mode list unverified"
+        return description + f" Current mode: {mode.width} x {mode.height} @ {mode.refresh_hz:.2f} Hz ({source})."
+    if observation is not None and observation.state == "inactive":
+        return description + " Current mode: inactive."
+    reason = observation.reason if observation is not None else "No current-mode observation is available."
+    return description + " Current mode: unverified. " + reason
 
 
 class StopSession(Exception):
@@ -237,6 +261,8 @@ def run(
     ui.text("DESCRIBE  /  TRY  /  VERIFY", "accent")
     write("I will suggest one step at a time. You make any changes in your settings; "
           "BeamFix reads the data again and asks what you see. You can skip a step or exit with 0.")
+    write("When available, readings include pixel resolution and refresh rate from the desktop session. "
+          "A listed or reported mode does not confirm a visible image. If these data are unavailable, basic guided checks remain available.")
     try:
         session.symptom = choose("What do you see on the projector?", list(SYMPTOMS.items()), read, ui)
         session.snapshot = snapshot_reader()

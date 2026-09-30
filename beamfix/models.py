@@ -12,7 +12,7 @@ class VideoMode:
 
 @dataclass(frozen=True)
 class CurrentMode:
-    state: str  # listed, inactive, unknown; never implies visible projection
+    state: str  # listed, reported, inactive, unknown; never implies visible projection
     source: str
     reason: str
     mode: VideoMode | None = None

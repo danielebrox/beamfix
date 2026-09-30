@@ -151,10 +151,11 @@ def render_doctor(snapshot: Snapshot, findings: list[Finding], exit_code: int, *
         ui.field("Output", connector.enabled, tone)
         observation = connector.current_mode
         if observation is not None:
-            if observation.state == "listed" and observation.mode is not None:
+            if observation.state in {"listed", "reported"} and observation.mode is not None:
                 mode = observation.mode
-                ui.field("Current mode", f"{mode.width} x {mode.height} @ {mode.refresh_hz:.2f} Hz", "ok")
-                ui.status("LISTED", observation.reason, "ok")
+                tone = "ok" if observation.state == "listed" else "info"
+                ui.field("Current mode", f"{mode.width} x {mode.height} @ {mode.refresh_hz:.2f} Hz", tone)
+                ui.status(observation.state.upper(), observation.reason, tone)
             elif observation.state == "inactive":
                 ui.field("Current mode", "Inactive")
             else:
@@ -165,7 +166,7 @@ def render_doctor(snapshot: Snapshot, findings: list[Finding], exit_code: int, *
     ui.text("Listed modes are not necessarily the mode currently in use.")
     if any(c.current_mode is not None for c in snapshot.connectors):
         ui.text("Current mode: configured pixel resolution and Hz, not desktop scaling or live refresh measurements.")
-        ui.text("Listed by KDE does not guarantee that the projected image is visible or correct.")
+        ui.text("A listed or reported mode does not guarantee that the projected image is visible or correct.")
 
     ui.section("SYSTEM")
     ui.field("System", safe(snapshot.system) + " / kernel " + safe(snapshot.kernel))

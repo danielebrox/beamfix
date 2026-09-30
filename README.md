@@ -3,7 +3,7 @@
 Local diagnostics for monitors and projectors on Linux. The goal is a simple
 workflow: connect the projector, run BeamFix, try a fix and confirm the result.
 
-**Status: guided troubleshooting, v0.2.3.** The `doctor` command collects data and
+**Status: guided troubleshooting, v0.2.5.** The `doctor` command collects data and
 reports potential issues; `troubleshoot` guides one step at a time and checks the
 outcome with the user. Automatic fixes and a graphical interface are on the roadmap.
 
@@ -23,8 +23,9 @@ python3 -m beamfix troubleshoot
 ```
 
 No additional Python runtime dependencies, Internet access, external services or
-API keys are needed. On KDE, `doctor` optionally uses the installed
-`kscreen-doctor` command to read active display modes. BeamFix does not require `sudo` and does not change the resolution,
+API keys are needed. For current modes, both commands optionally use installed
+`kscreen-doctor` on KDE, or `wayland-info` on Wayland sessions. BeamFix does not
+install these tools automatically, require `sudo`, or change the resolution,
 drivers or desktop configuration.
 
 To install the command in a virtual environment (requires `venv` and `pip`):
@@ -56,22 +57,48 @@ The green `LISTED` label means that KDE includes this mode in its available
 list; it does not guarantee that the projector displays a correct image or that
 the mode was advertised by the monitor rather than added manually.
 
-Disabled or disconnected outputs show `Inactive`, even if KDE retains their
-previous mode. Yellow `UNVERIFIED` means the current mode cannot be established:
-for example, the desktop is unsupported, `kscreen-doctor` is missing or cannot
-reach the session, the data are incomplete, or connector names are ambiguous.
-A missing mode is not automatically labelled incompatible or shown in red.
+On other Linux Wayland desktops, and when the KDE query is unavailable, BeamFix
+reads standard `wl_output` data using `wayland-info -i wl_output`. This path does
+not depend on the desktop name. If `wayland-info` is installed and the session
+exposes uniquely matching output names and a readable current mode, it shows:
 
-This first backend is for KDE; it has been checked on KDE/Wayland. On KDE/X11,
-output names must match the Linux connector names uniquely; aliases are not
-guessed. Other desktops retain basic DRM diagnostics and show the active mode
-as unverified. The KDE query is read-only, has a five-second timeout, and never
-installs packages or changes display settings.
+```text
+Current mode: 3840 x 2160 @ 60.00 Hz
+[REPORTED] Current mode reported by Wayland; the available mode list is not verified.
+```
 
-The values describe the configured pixel resolution and refresh rate, not the
-scaled desktop size or instantaneous refresh under variable refresh rate (VRR).
-An unverified current mode makes `doctor` return `2` (incomplete observation),
-while preserving the other diagnostic results.
+`REPORTED` is informational (cyan), distinct from green `LISTED`. Standard Wayland
+reports the session's current mode but does not guarantee an alternative-mode
+list or expose disabled outputs. Virtual outputs may report synthetic values.
+BeamFix retains the independent Linux DRM observations and never treats absence
+from Wayland as proof of disconnection. It does not guess aliases or match names
+that are duplicated across GPUs. Missing names, unknown/zero refresh rates,
+unreadable records and conflicting Linux/Wayland state remain `UNVERIFIED`.
+
+KDE's valid configuration response takes precedence, including any ambiguous or
+conflicting entries: a fallback must not conceal those uncertainties. The
+Wayland fallback is used when the KDE command is absent, fails, times out or
+returns an unreadable configuration. On KDE/X11 only the KDE backend is used;
+other X11 desktops retain basic DRM diagnostics. A generic RandR backend is not
+yet implemented. Both queries are read-only with a five-second timeout each.
+
+Disabled/disconnected outputs are labelled `Inactive` when supported by the
+observations. Previous modes are never reused as a fresh reading. Yellow
+`UNVERIFIED` means that the current mode cannot be established, not that it is
+incompatible. Missing optional tools never prevent the basic DRM diagnostics.
+
+The values describe pixel resolution and refresh rate reported by the session,
+not the scaled desktop size or instantaneous refresh under variable refresh rate
+(VRR). An unverified current mode makes `doctor` return `2` (incomplete
+observation), while preserving the other diagnostic results. A readable
+`REPORTED` mode alone does not make the observation incomplete or establish
+visual success.
+
+Both backends have been checked on KDE/Wayland, including agreement on the
+current mode. Other Wayland desktops are covered by simulated tests only;
+compatibility still requires real-session testing. The `wayland-info` adapter
+parses its text output conservatively; an unsupported output format remains
+unverified. Older Wayland outputs without names cannot be matched.
 
 ## Terminal presentation
 
@@ -111,6 +138,15 @@ input or connection, enabling the output, selecting the presentation screen,
 mirroring, or trying another video mode. You make any changes manually in your
 desktop settings: BeamFix neither applies nor rolls them back.
 
+When available, the guided readings also include the selected output's configured
+resolution and refresh rate. When suggesting a different mode, BeamFix shows
+the observed mode and asks you to check it in Display settings before changing
+it. Each completed step queries the desktop again, and the summary retains the before/after
+values, including changes in refresh rate at the same resolution. An inactive
+output or an unavailable mode is labelled explicitly; previous values are never
+carried forward as a new observation. If current-mode data are unavailable, the basic
+guided checks continue. A mode listed by KDE or reported by Wayland does not confirm a correct image.
+
 After you choose Done, BeamFix reads the state again and asks what you see. If the
 symptom changes, the next step changes accordingly. A completed or skipped step
 is not offered again within the same session. If a connection change requires
@@ -134,13 +170,13 @@ report is available through `doctor --json`.
 - Operating system, kernel, reported session type and desktop.
 - DRM graphics cards and driver names, when available.
 - Connectors, connection state, output enablement and listed video modes.
-- Current configured resolution and Hz on KDE, with explicit verification status.
+- Current resolution and Hz through KDE or standard Wayland, with explicit source and status.
 - Connected but disabled outputs, missing modes and inaccessible data.
 - An English terminal report or JSON with a schema version and diagnostic codes.
 
-BeamFix reads `/sys/class/drm`, optional KDE display configuration, and two session variables:
+BeamFix reads `/sys/class/drm`, optional KDE/Wayland observations, and two session variables:
 `XDG_SESSION_TYPE` and `XDG_CURRENT_DESKTOP`. Only the required output-state and
-mode fields from KDE are retained; raw KDE responses, EDID data, serial numbers,
+mode fields are retained; raw tool responses, descriptions, EDID data, serial numbers,
 profile paths, hostnames, accounts and system logs are not included in reports.
 Reports are not saved or sent
 automatically. Reports still contain hardware and environment details: review
@@ -149,7 +185,7 @@ them before sharing.
 ## Limitations
 
 An enabled output does not prove that the image is visible or correct. This
-version can read configured resolution and Hz on KDE, but does not measure
+version can read resolution and Hz from KDE or Wayland, but does not measure
 instantaneous refresh, scaling, audio, HDCP or cable quality. It cannot reliably distinguish a monitor from a projector.
 USB-C may appear as DisplayPort: the DRM connector type does not identify the
 physical cable.
@@ -157,7 +193,7 @@ physical cable.
 The data are a kernel observation and may be incomplete or change during
 connection. A listed mode is not necessarily the active mode. BeamFix does not
 force a display rescan. Basic DRM checks are independent of the desktop; current-mode
-observation uses a KDE backend. Compatibility with specific drivers and devices
+observation uses KDE or standard Wayland backends. Compatibility with specific drivers and devices
 requires hardware testing.
 
 Exit codes for `doctor`: `0` means no issues were detected by the available

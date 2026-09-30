@@ -2,7 +2,8 @@
 
 `collect.py` reads kernel observations and produces a `Snapshot`.
 `diagnose.py` applies deterministic rules to that model without accessing the system.
-`desktop.py` optionally enriches the `doctor` snapshot with current KDE modes.
+`desktop.py` selects optional current-mode observations for both commands.
+`wayland.py` reads standard Wayland outputs through `wayland-info`.
 `cli.py` presents results or exports JSON to stdout.
 `models.py` defines shared data and result types.
 
@@ -63,12 +64,28 @@ and add a test case that distinguishes a fault from a normal state.
 
 ## Current-mode observation
 
-For `doctor`, `collect_doctor` first runs the DRM collector, then optionally reads
-KDE using `kscreen-doctor --json`. Other desktops and nongraphical sessions do not
-launch KScreen. The subprocess has no input, discards stderr and has a five-second
-timeout. Missing tools, failed queries and malformed data produce explicit
-unverified results without losing the DRM snapshot. The guided troubleshooter
-continues to use the DRM collector alone.
+Both commands use `collect_doctor`, which first runs the DRM collector. On Linux
+KDE graphical sessions it queries `kscreen-doctor --json`. A structurally valid
+KDE response is retained even when individual outputs are ambiguous or conflict
+with DRM. If that query is unavailable or its top-level response cannot be read,
+Linux Wayland sessions fall back to `wayland-info -i wl_output`. Other Wayland
+desktops use that standard path directly; detection depends on session type,
+not a desktop allowlist. Nongraphical and non-Linux sessions launch neither tool.
+Only KDE is currently supported for active-mode observation on X11.
+
+Each subprocess has no input, discards stderr and has a five-second timeout
+(up to ten seconds when KDE times out before a Wayland fallback). The Wayland
+query preserves the session environment and sets `LC_ALL=C` for text parsing.
+Missing tools, failed queries and malformed data produce explicit unverified
+results without losing the DRM snapshot. Nothing is installed automatically.
+
+The guided troubleshooter repeats observation after each completed step, but not
+after a skipped step. Descriptions retained in attempts include the current mode
+and its provenance or an explicit inactive/unverified state. A mode-change step
+uses only the selected connector's fresh observation and asks the user to check
+it before making a manual change. Unknown modes do not block the basic guided
+checks or change guided exit codes. Listed/reported modes never count as visual
+success. No previous mode is reused when a later reading is unavailable.
 
 The parser follows KDE's [configuration serializer](https://github.com/KDE/libkscreen/blob/master/src/configserializer.cpp):
 `outputs`, `name`, `connected`, `enabled`, `currentModeId`, and the mode list's
@@ -85,12 +102,38 @@ Disabled/disconnected outputs never expose a retained mode as currently active.
 Missing, duplicate or invalid current modes are unknown, not proof of incompatibility.
 
 `Connector.current_mode` is an additive JSON v1 field with `state` (`listed`,
-`inactive` or `unknown`), `source`, `reason`, and optional `mode` containing `width`,
+`reported`, `inactive` or `unknown`), `source`, `reason`, and optional `mode` containing `width`,
 `height` and `refresh_hz`. Existing `modes` still means the DRM names, without Hz.
 An unknown current-mode observation returns exit code `2`; a listed mode never
 sets `visual_confirmation` or proves the image is visible. No unsupported/red
 classification is inferred from the available KDE data, including custom modes.
 Raw desktop responses and unrelated identity/profile data are discarded.
+
+### Standard Wayland boundaries
+
+The adapter follows the [standard wl_output protocol](https://wayland.freedesktop.org/docs/html/apa.html#protocol-spec-wl_output)
+through the installed `wayland-info` utility. Its human-readable output is not a
+versioned data format: only recognized named `wl_output` blocks, mode dimensions,
+Hz and `current` flags are accepted. Preferred modes and logical/scaled geometry
+are not substituted for the current mode. Multiple current entries, invalid or
+zero refresh, missing names and unfamiliar record layouts remain unknown.
+Name matching strips only the DRM card prefix and requires uniqueness on both
+sides; aliases and outputs without names are not guessed. A same-name match is
+a correlation within the current session, not proof of persistent device identity.
+
+A match requires Linux to report connected and enabled; conflicting or unknown
+DRM state stays unknown. An output absent from Wayland is labelled inactive only
+when DRM independently reports disabled/disconnected. Otherwise its mode is
+unknown: `wl_output` is not an inventory of physical connectors. Virtual outputs
+may advertise synthetic sizes or rates and are not added to the DRM inventory.
+
+A readable mode uses the new JSON v1 state `reported`, source `wayland-info`, and
+the existing `mode` shape. Consumers must handle this additional state. This
+means reported by the session, not verified against an available-mode list; it
+is shown with a neutral `REPORTED` label. Like `listed`, it does not itself make
+`doctor` return `2` or provide visual confirmation. Raw output, descriptions,
+make/model and unrelated interface data are discarded. The DRM mode list is
+preserved independently. No output-management or settings changes are performed.
 
 ## Terminal presentation
 
