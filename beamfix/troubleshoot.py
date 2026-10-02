@@ -1,7 +1,8 @@
-"""Guided, read-only troubleshooting with explicit human visual verification."""
+"""Guided troubleshooting with explicit human visual verification."""
 
 from collections.abc import Callable
 from dataclasses import dataclass, field, replace
+import sys
 
 from . import __version__
 from .desktop import collect_doctor as collect
@@ -83,6 +84,7 @@ class Attempt:
     before: str
     after: str | None = None
     observation: str | None = None
+    automatic_result: str | None = None
 
 
 @dataclass
@@ -110,7 +112,7 @@ def target_connector(snapshot: Snapshot, target: str | None) -> Connector | None
     return next((c for c in candidates(snapshot) if c.name == target), None)
 
 
-def next_step(snapshot: Snapshot, target: str | None, symptom: str, tried: set[str]) -> Step | None:
+def next_step(snapshot: Snapshot, target: str | None, symptom: str, tried: set[str], *, try_modes=False) -> Step | None:
     """Choose one applicable test; never infer visual success or repeat a test."""
     connector = target_connector(snapshot, target)
     if not candidates(snapshot):
@@ -132,6 +134,8 @@ def next_step(snapshot: Snapshot, target: str | None, symptom: str, tried: set[s
         codes = ["presentation", "mirror"]
     else:
         codes = ["input", "mirror", "mode", "reconnect", "direct", "cable"]
+        if try_modes:
+            codes = ["input", "mode", "mirror", "reconnect", "direct", "cable"]
     step = next((STEPS[code] for code in codes if code not in tried), None)
     if step is not None and step.code == "mode" and connector is not None:
         observation = connector.current_mode
@@ -217,6 +221,7 @@ def summarize(session: Session, ui: Terminal) -> int:
         "resolved": "Expected image confirmed by the user.",
         "unresolved": "The problem remains: there are no more guided steps available.",
         "insufficient": "Insufficient data to continue with targeted diagnostics.",
+        "not_confirmed": "The automatic mode sequence ended without visual confirmation.",
         "interrupted": "Troubleshooting interrupted; resolution not confirmed.",
     }
     ui.section("SUMMARY")
@@ -225,7 +230,11 @@ def summarize(session: Session, ui: Terminal) -> int:
     ui.blank()
     for number, attempt in enumerate(session.attempts, 1):
         state = "performed" if attempt.performed else "skipped, not verified"
+        if attempt.automatic_result is not None:
+            state = "automatic attempt" if attempt.performed else "not applied"
         ui.text(f"{number}. {attempt.step.title}: {state}.", "title")
+        if attempt.automatic_result is not None:
+            write("   Automatic attempt: " + attempt.automatic_result)
         if attempt.performed:
             write("   Before: " + attempt.before)
             if attempt.after is not None:
@@ -240,8 +249,75 @@ def summarize(session: Session, ui: Terminal) -> int:
     if session.outcome != "resolved":
         write("Failed or skipped steps do not rule out a fault in the cable, adapter or projector.")
         write("For further investigation, keep this summary and the report from beamfix doctor --json.")
-    write("BeamFix has not applied changes or saved reports automatically.")
+    if any(a.automatic_result is not None for a in session.attempts):
+        write("Automatic attempts and recovery results are listed above. No report was saved.")
+    else:
+        write("BeamFix has not applied changes or saved reports automatically.")
     return 0 if session.outcome == "resolved" else (1 if session.outcome == "unresolved" else 2)
+
+
+def offer_activation(target, read, ui, *, snapshot=None):
+    from .automatic import confirm_in_terminal, run_activation
+    from .fix_backends import backend_for
+    from .kde_fix import Unavailable
+
+    if not sys.stdin.isatty():
+        ui.status("MANUAL", "Automatic activation requires an interactive terminal.", "warning")
+        return "manual"
+    try:
+        plan = backend_for(snapshot or collect()).prepare(target)
+    except Unavailable as error:
+        ui.status("MANUAL", str(error), "warning")
+        return "manual"
+    ui.section("AUTOMATIC ACTIVATION PREVIEW")
+    ui.text(plan.description)
+    ui.text("After activation, confirm the expected image within 15 seconds. Otherwise BeamFix "
+            "will try to restore the disabled state. Keep cables and Display settings unchanged during the attempt.")
+    action = choose("Try this automatic activation?", [
+        ("try", "Try activation with automatic undo"),
+        ("manual", "Use the manual instructions instead"),
+        ("skip", "Skip activation"),
+    ], read, ui)
+    if action != "try":
+        return action
+    ui.text("Checking the configuration and starting the protected attempt...")
+    return run_activation(plan, lambda seconds: confirm_in_terminal(ui, seconds))
+
+
+def offer_modes(target, read, ui, *, snapshot):
+    from .automatic import confirm_mode_in_terminal, run_mode_sequence
+    from .fix_backends import prepare_modes
+    from .kde_fix import Unavailable
+
+    if not sys.stdin.isatty():
+        ui.status("MANUAL", "Automatic mode trials require an interactive terminal.", "warning")
+        return "manual"
+    try:
+        plans = prepare_modes(snapshot, target)
+    except Unavailable as error:
+        ui.status("MANUAL", str(error), "warning")
+        return "manual"
+    ui.section("AUTOMATIC MODE TRIALS PREVIEW")
+    for index, plan in enumerate(plans, 1):
+        ui.text(f"{index}. {plan.description}")
+    ui.text("These are modes listed by KDE, not verified projector compatibility. Each trial has a "
+            "15-second confirmation window. Choose Next to restore the original configuration before "
+            "the following trial. No answer restores and stops. Keep cables and Display settings "
+            "unchanged, and use the terminal on the other active screen.")
+    action = choose("Start this mode sequence?", [
+        ("try", "Try these modes with automatic undo"),
+        ("manual", "Use the manual instructions instead"),
+        ("skip", "Skip mode trials"),
+    ], read, ui)
+    if action != "try":
+        return action
+
+    def confirm(plan, index, total, seconds):
+        ui.section(f"MODE TRIAL {index}/{total}")
+        ui.text(plan.description)
+        return confirm_mode_in_terminal(ui, seconds)
+
+    return run_mode_sequence(plans, confirm)
 
 
 def run(
@@ -251,6 +327,7 @@ def run(
     write: Callable[[str], None] | None = None,
     plain: bool = False,
     terminal: Terminal | None = None,
+    try_fix: bool = False,
 ) -> int:
     snapshot_reader = snapshot_reader or collect
     read = read or input
@@ -259,8 +336,14 @@ def run(
     session = Session()
     ui.banner("Guided projector troubleshooting", __version__)
     ui.text("DESCRIBE  /  TRY  /  VERIFY", "accent")
-    write("I will suggest one step at a time. You make any changes in your settings; "
-          "BeamFix reads the data again and asks what you see. You can skip a step or exit with 0.")
+    if try_fix:
+        write("I will suggest one step at a time. On KDE or GNOME Wayland, a disabled external output may be "
+              "eligible for automatic activation after a preview and your approval. KDE Wayland also supports "
+              "a short sequence of mode trials on an active external output. Other changes are manual. "
+              "You can skip a step or exit with 0.")
+    else:
+        write("I will suggest one step at a time. You make any changes in your settings; "
+              "BeamFix reads the data again and asks what you see. You can skip a step or exit with 0.")
     write("When available, readings include pixel resolution and refresh rate from the desktop session. "
           "A listed or reported mode does not confirm a visible image. If these data are unavailable, basic guided checks remain available.")
     try:
@@ -271,10 +354,34 @@ def run(
             ui.section("CURRENT DISPLAY")
             write("Observed state: " + describe(session.snapshot, session.target))
             tried = {a.step.code for a in session.attempts}
-            step = next_step(session.snapshot, session.target, session.symptom, tried)
+            step = next_step(session.snapshot, session.target, session.symptom, tried, try_modes=try_fix)
             if step is None:
                 session.outcome = "insufficient" if insufficient(session) else "unresolved"
                 break
+            if try_fix and step.code in {"activate", "mode"}:
+                offer = offer_activation if step.code == "activate" else offer_modes
+                automatic = offer(session.target, read, ui, snapshot=session.snapshot)
+                if automatic == "skip":
+                    session.attempts.append(Attempt(step, False, describe(session.snapshot, session.target)))
+                    continue
+                if automatic != "manual":
+                    title = "Try automatic output activation" if step.code == "activate" else "Try automatic display modes"
+                    attempt = Attempt(replace(step, title=title), automatic.attempted,
+                                      describe(session.snapshot, session.target),
+                                      automatic_result=automatic.detail)
+                    session.attempts.append(attempt)
+                    session.snapshot = snapshot_reader()
+                    attempt.after = describe(session.snapshot, session.target)
+                    attempt.observation = "expected image confirmed" if automatic.status == "kept" else "not confirmed"
+                    session.outcome = "resolved" if automatic.status == "kept" else "insufficient"
+                    if step.code == "mode" and automatic.status != "kept":
+                        session.outcome = "not_confirmed"
+                    ui.status("KEPT" if automatic.status == "kept" else "NOT KEPT", automatic.detail,
+                              "ok" if automatic.status == "kept" else "warning")
+                    if automatic.status != "kept":
+                        write("The automatic attempt has ended. Check Display settings if requested above; "
+                              "run beamfix troubleshoot to continue with manual checks.")
+                    break
             ui.step(len(session.attempts) + 1, step.title, step.reason, step.instruction)
             action = choose("When you are ready:", [("done", "Done: read the state again"), ("skip", "Skip this step")], read, ui)
             attempt = Attempt(step, action == "done", describe(session.snapshot, session.target))

@@ -18,6 +18,8 @@ def main(argv: list[str] | None = None) -> int:
     doctor = commands.add_parser("doctor", help="Read system state without changing it.")
     doctor.add_argument("--json", action="store_true", help="Structured report for development and support.")
     guided = commands.add_parser("troubleshoot", help="Guide troubleshooting when the projector does not show the expected image.")
+    guided.add_argument("--try-fix", action="store_true",
+                        help="Offer KDE/GNOME Wayland activation and KDE mode trials with approval and automatic undo.")
     for command in (doctor, guided):
         command.add_argument("--plain", action="store_true", default=argparse.SUPPRESS,
                              help="Use plain text without colors or decorative characters.")
@@ -25,7 +27,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "troubleshoot":
         from .troubleshoot import run
 
-        return run(plain=args.plain)
+        return run(plain=args.plain, try_fix=args.try_fix)
     snapshot = collect()
     findings = diagnose(snapshot)
     uncertain = any(c.status == "unknown" or (c.current_mode is not None and c.current_mode.state == "unknown")

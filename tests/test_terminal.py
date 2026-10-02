@@ -101,7 +101,7 @@ class TerminalTests(unittest.TestCase):
             self.assertIn("NEXT STEPS", output.getvalue())
         with patch("beamfix.troubleshoot.run", return_value=2) as guided:
             main(["troubleshoot", "--plain"])
-            guided.assert_called_once_with(plain=True)
+            guided.assert_called_once_with(plain=True, try_fix=False)
 
     def test_doctor_unknown_state_is_not_presented_as_success(self):
         data = sample()

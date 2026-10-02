@@ -68,18 +68,56 @@ Real-projector field validation remains open; these changes do not apply setting
 Real GNOME, Hyprland and Cinnamon Wayland sessions remain to be tested. A generic
 X11/RandR backend and shared Wayland output-management support remain future work.
 
-## 0.3 — First backend for applying fixes
+## 0.3 — First backend for applying fixes (implemented; field validation open)
 
-Choose a single desktop environment after the first test on the development
-computer. Detect the current configuration, propose enabling an output and show
-an action preview. Apply one change at a time, with automatic rollback and visual
-confirmation. Verify timeout, crash and projector disconnection behavior.
+- Opt-in `troubleshoot --try-fix` on KDE/Wayland, with manual fallback.
+- Preview and explicit approval to activate one connected, disabled external output.
+- Retained mode and layout, another verified active screen, fresh preconditions.
+- Independent helper owns activation, a 15-second visual confirmation window and undo.
+- Read-back verification, conservative handling of external changes and failed recovery.
+- Simulated transaction tests plus real subprocess/IPC tests for UI death and timeout.
+- Live read-only configuration parsing checked on the development computer.
+
+Real-projector activation and rollback remain unverified. Complete the
+[field checklist](automatic-activation-checklist.md) before treating this backend
+as classroom-ready. General mode selection and mirroring remain future work.
+
+### 0.3.1 — GNOME Wayland activation (implemented; field validation open)
+
+- Select KDE or GNOME explicitly from the current Wayland desktop.
+- GNOME/Mutter DisplayConfig through optional `busctl` JSON, without Python dependencies.
+- Preview one preferred mode and a position to the right of existing screens.
+- Preserve existing modes, layout, primary screen, scale and supported color settings.
+- Verify and apply temporary configurations using fresh Mutter serials; no saved profile.
+- Share the independent visual-confirmation and recovery helper with KDE.
+- Test typed calls against a simulated Mutter service on a private real D-Bus bus.
+- Test both backends' helper processes for timeout, UI death and recovery.
+
+A real GNOME session and physical projector still require field validation.
+Cloning, leased monitors, uncertain observations and unsupported settings stay manual.
+
+### 0.3.2 — Bounded KDE mode trials (implemented; field validation open)
+
+- Opt-in mode sequence for a connected, enabled external output on KDE Wayland.
+- Preview up to five distinct listed resolution/refresh pairs, excluding the current pair.
+- Another verified active screen, exact restorable mode IDs and unchanged layout.
+- Explicit Keep, Next or Stop; silence and terminal loss restore and stop.
+- Verified restoration to the same baseline before every requested next trial.
+- Per-trial summary, bounded exhaustion and conservative handling of external changes.
+- Shared confirmation/recovery and sequence control, ready for another mode backend.
+- Simulated planner, UI, transaction and detached-process recovery tests.
+
+The next implementation priority is **GNOME mode trials for Fedora Workstation**.
+The planned real-projector field test is on the portable Fedora Workstation
+computer using GNOME, not the KDE development machine. A KDE-only sequence
+does not complete that field-test requirement. GNOME activation remains available;
+GNOME mode trials are currently manual. Physical validation remains pending.
 
 ## 0.4 — Everyday use
 
-An interface with Diagnose and Try a fix actions; mirroring/extension and selection
-of a compatible mode using backend data. Add HDMI audio diagnostics and a second
-desktop environment only after verifying the first.
+An interface with Diagnose and Try a fix actions; mirroring/extension and broader
+mode-trial support using backend data. Add HDMI audio diagnostics and further
+desktop environments after field validation of the existing backends.
 
 ## Before a public release
 
