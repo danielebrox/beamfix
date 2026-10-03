@@ -1,3 +1,5 @@
+include LICENSE NOTICE LICENSING.md CONTRIBUTING.md
+include beamfix/LICENSE.txt beamfix/NOTICE.txt
 recursive-include beamfix/web *.html *.css *.js *.svg
 recursive-include packaging *.py
 recursive-include scripts *.py

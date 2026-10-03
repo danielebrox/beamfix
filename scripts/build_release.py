@@ -29,10 +29,12 @@ def main():
         shutil.copytree(ROOT / 'beamfix', bundle / 'beamfix', ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
         for filename in ('launch.py', 'install.py'):
             shutil.copy2(ROOT / 'packaging' / filename, bundle / filename)
-        shutil.copy2(ROOT / 'README.md', bundle / 'README.md')
+        for filename in ('README.md', 'LICENSE', 'NOTICE', 'LICENSING.md', 'CONTRIBUTING.md'):
+            shutil.copy2(ROOT / filename, bundle / filename)
         shutil.copytree(ROOT / 'docs', bundle / 'docs')
         (bundle / 'START-HERE.txt').write_text(
             f'BeamFix {__version__} — Linux, Python 3.11+ and a browser\n\n'
+            'Free software under GPL-3.0-only, without warranty. See LICENSE and NOTICE.\n\n'
             'Run without installation, from this folder:\n'
             '  python3 launch.py gui\n'
             '  python3 launch.py doctor\n'

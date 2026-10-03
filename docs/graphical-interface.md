@@ -61,10 +61,10 @@ connection and attempts; diagnostic JSON keeps `visual_confirmation: not_perform
 
 ## Portable Linux bundle
 
-Extract `beamfix-0.4.0-linux-portable.tar.gz` anywhere in your user files:
+Extract `beamfix-0.4.1-linux-portable.tar.gz` anywhere in your user files:
 
 ```bash
-cd beamfix-0.4.0
+cd beamfix-0.4.1
 python3 launch.py gui
 python3 launch.py doctor
 python3 launch.py troubleshoot --try-fix
@@ -105,8 +105,9 @@ python3 install.py --uninstall
 
 Removal deletes only the managed launchers and installed bundle, leaving saved
 reports alone. The development checkout and portable archive remain available.
-This first package is intended for private testing; the project has not selected
-a public distribution license.
+The package is experimental and released under GPL-3.0-only. It includes the
+license and copyright notices, which the user installer also preserves. See
+[licensing](../LICENSING.md) for distribution and commercial-use details.
 
 ## Standard Python packaging
 
@@ -115,7 +116,7 @@ entry points and the HTML/CSS/JavaScript/SVG assets are in the wheel. For exampl
 from a virtual environment:
 
 ```bash
-python -m pip install --no-deps /path/to/beamfix-0.4.0-py3-none-any.whl
+python -m pip install --no-deps /path/to/beamfix-0.4.1-py3-none-any.whl
 beamfix gui
 beamfix doctor --json
 ```

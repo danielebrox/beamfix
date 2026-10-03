@@ -170,6 +170,6 @@ support, automatic mirroring/extension and HDMI audio remain future increments.
 
 ## Before a public release
 
-Choose a license and distribution method. Test real projectors, direct HDMI,
+Review GPLv3 distribution and packaging. Test real projectors, direct HDMI,
 USB-C adapters and docks; document the desktops, GPUs and drivers verified.
 Do not promise universal compatibility or repair of physical faults.

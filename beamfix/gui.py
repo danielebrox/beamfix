@@ -332,6 +332,10 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/api/state":
             self.send(200, self.server.app.state())
             return
+        if self.path in {"/license", "/notice"}:
+            name = "LICENSE.txt" if self.path == "/license" else "NOTICE.txt"
+            self.send(200, files("beamfix").joinpath(name).read_bytes(), "text/plain; charset=utf-8")
+            return
         assets = {"/": ("index.html", "text/html; charset=utf-8"),
                   "/app.js": ("app.js", "text/javascript; charset=utf-8"),
                   "/style.css": ("style.css", "text/css; charset=utf-8"),

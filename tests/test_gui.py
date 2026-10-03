@@ -215,7 +215,7 @@ class HTTPTests(unittest.TestCase):
         self.assertEqual(self.request('/api/state')[0],200)
 
     def test_only_allowlisted_assets_are_served_without_auth(self):
-        for path in ('/','/app.js','/style.css','/no_signal.svg','/black.svg','/desktop.svg','/room_monitors_only.svg'):
+        for path in ('/','/license','/notice','/app.js','/style.css','/no_signal.svg','/black.svg','/desktop.svg','/room_monitors_only.svg'):
             status,body,headers=self.request(path,headers={'X-BeamFix-Token':''})
             self.assertEqual(status,200)
             self.assertTrue(body)

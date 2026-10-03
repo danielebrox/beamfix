@@ -1,12 +1,14 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77.0.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "beamfix"
-version = "0.4.0"
+version = "0.4.1"
 description = "Local-first Linux display diagnostics"
 readme = "README.md"
+license = "GPL-3.0-only"
+license-files = ["LICENSE", "NOTICE"]
 requires-python = ">=3.11"
 dependencies = []
 
@@ -18,4 +20,4 @@ beamfix-gui = "beamfix.gui:main"
 include = ["beamfix*"]
 
 [tool.setuptools.package-data]
-beamfix = ["web/*.html", "web/*.css", "web/*.js", "web/*.svg"]
+beamfix = ["LICENSE.txt", "NOTICE.txt", "web/*.html", "web/*.css", "web/*.js", "web/*.svg"]

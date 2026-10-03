@@ -1,0 +1,20 @@
+BeamFix — local projector diagnostics and guided fixes
+Copyright (C) 2026 danielebrox and contributors
+
+SPDX-License-Identifier: GPL-3.0-only
+
+BeamFix is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation, version 3 of the License.
+
+BeamFix is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with BeamFix. If not, see <https://www.gnu.org/licenses/>.
+
+This grant covers the project's code, documentation and bundled artwork,
+unless a file explicitly states otherwise. The license document itself
+retains the Free Software Foundation's notice and copying terms.

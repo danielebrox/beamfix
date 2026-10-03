@@ -64,14 +64,17 @@ def main():
         print('Removed the managed launchers, menu entry and application bundle. Saved reports are untouched.')
         return
     source = Path(__file__).resolve().parent
-    if not (source / 'beamfix/cli.py').is_file():
+    if not all((source / name).is_file() for name in
+               ('beamfix/cli.py', 'beamfix/LICENSE.txt', 'beamfix/NOTICE.txt', 'LICENSE', 'NOTICE',
+                'LICENSING.md', 'CONTRIBUTING.md', 'launch.py')):
         parser.error('Run install.py from the extracted BeamFix portable bundle.')
     root.mkdir(parents=True, exist_ok=True)
     name = 'app-' + uuid.uuid4().hex
     bundle = root / name
     bundle.mkdir()
     shutil.copytree(source / 'beamfix', bundle / 'beamfix', ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
-    shutil.copy2(source / 'launch.py', bundle / 'launch.py')
+    for filename in ('launch.py', 'LICENSE', 'NOTICE', 'LICENSING.md', 'CONTRIBUTING.md'):
+        shutil.copy2(source / filename, bundle / filename)
     command = shlex.quote(sys.executable) + ' ' + shlex.quote(str(bundle / 'launch.py'))
     write_atomic(paths[0], '#!/bin/sh\n' + MARKER + '\nexec ' + command + ' "$@"\n', 0o755)
     write_atomic(paths[1], '#!/bin/sh\n' + MARKER + '\nexec ' + command + ' gui "$@"\n', 0o755)

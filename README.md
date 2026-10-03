@@ -3,7 +3,7 @@
 Local diagnostics for monitors and projectors on Linux. The goal is a simple
 workflow: connect the projector, run BeamFix, try a fix and confirm the result.
 
-**Status: v0.4.0 — offline graphical interface, portable packaging and independent CLI (experimental).** The `doctor` command collects data and
+**Status: v0.4.1 — offline graphical interface, portable packaging and independent CLI (experimental).** The `doctor` command collects data and
 reports potential issues; `troubleshoot` guides one step at a time and checks the
 outcome with the user. Opt in with `troubleshoot --try-fix` to try reversible
 activation of a disabled external output on KDE or GNOME Wayland, or a bounded sequence
@@ -57,7 +57,7 @@ already installed an earlier version, run `.venv/bin/python -m pip install .`
 again to update the command in the virtual environment. Running
 `python3 -m beamfix` from the repository directory uses the local source directly.
 
-## Graphical interface and offline package (0.4.0)
+## Graphical interface and offline package (0.4.1)
 
 ![BeamFix graphical interface with simulated display data](docs/images/gui-preview.jpg)
 
@@ -74,12 +74,12 @@ situations, identify the output, follow a manual check or preview an automatic
 attempt, then confirm the image on the projector itself. Diagnostics and session
 summaries can be saved explicitly as JSON. The CLI remains fully independent.
 
-Download the [experimental 0.4.0 release](https://github.com/danielebrox/beamfix/releases/tag/v0.4.0).
+Download the [experimental 0.4.1 release](https://github.com/danielebrox/beamfix/releases/tag/v0.4.1).
 For another Linux computer, extract the **portable asset**
-`beamfix-0.4.0-linux-portable.tar.gz` and run:
+`beamfix-0.4.1-linux-portable.tar.gz` and run:
 
 ```bash
-cd beamfix-0.4.0
+cd beamfix-0.4.1
 python3 launch.py gui        # portable: no installation
 python3 install.py          # optional user installation and application-menu entry
 ```
@@ -470,5 +470,12 @@ See the [architecture](docs/architecture.md) and [roadmap](docs/roadmap.md).
 The interface, documentation and GitHub contributions use English. Keep commit
 messages, issue descriptions and pull requests in English as well.
 
-The project is under private development. A distribution license has not yet
-been selected.
+## License and contributions
+
+BeamFix is free software under [GNU GPL version 3 only](LICENSE)
+(`GPL-3.0-only`), without warranty. You may use, modify, share and sell copies
+under those terms. Distributed covered derivatives must preserve the GPL
+freedoms and provide corresponding source as required by the license.
+
+See [LICENSING.md](LICENSING.md) for commercial distribution and
+[CONTRIBUTING.md](CONTRIBUTING.md) before proposing contributions.
