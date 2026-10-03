@@ -163,6 +163,11 @@ def render_doctor(snapshot: Snapshot, findings: list[Finding], exit_code: int, *
                 ui.status("UNVERIFIED", observation.reason, "warning")
         modes = "unavailable" if connector.modes is None else (", ".join(connector.modes) or "none listed")
         ui.field("Available modes", modes)
+        if connector.signal is not None:
+            from .signal import signal_lines
+
+            for line in signal_lines(connector.signal):
+                ui.text(line)
     ui.text("Listed modes are not necessarily the mode currently in use.")
     if any(c.current_mode is not None for c in snapshot.connectors):
         ui.text("Current mode: configured pixel resolution and Hz, not desktop scaling or live refresh measurements.")

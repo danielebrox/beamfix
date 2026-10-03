@@ -191,7 +191,7 @@ class GNOMEActivationPlan:
                 "The change is temporary for this session; no display profile is saved.")
 
 
-def plan_activation(snapshot, target, reply):
+def validated_configuration(snapshot, target, reply, *, enabled):
     require(snapshot.system == "Linux" and snapshot.session == "wayland"
             and "GNOME" in snapshot.desktop.upper().split(":"),
             "This backend requires a GNOME Wayland session.")
@@ -200,8 +200,8 @@ def plan_activation(snapshot, target, reply):
     require(len(matches) == 1, "Select one identifiable external output first.")
     target_connector = matches[0]
     require(target_connector.kind == "external" and target_connector.status == "connected"
-            and target_connector.enabled == "disabled" and bool(target_connector.modes),
-            "This fix requires a connected, disabled external output with readable modes.")
+            and target_connector.enabled == ("enabled" if enabled else "disabled") and bool(target_connector.modes),
+            f"This fix requires a connected, {'enabled' if enabled else 'disabled'} external output with readable modes.")
     _, state = configuration(reply)
     by_port = {}
     for output in state["monitors"]:
@@ -210,8 +210,9 @@ def plan_activation(snapshot, target, reply):
         by_port[key] = output
     name = by_port.get(port_key(target))
     active = {item["output"] for item in state["logical"]}
-    require(name in state["monitors"] and name not in active and not state["monitors"][name]["builtin"],
+    require(name in state["monitors"] and (name in active) == enabled and not state["monitors"][name]["builtin"],
             "GNOME and Linux do not agree on the selected external output.")
+    require(any(output != name for output in active), "Another active screen is required for automatic changes.")
     # Check the complete connected inventory, including inactive monitors. Never
     # guess aliases beyond Mutter's native HDMI spelling, or select another GPU.
     for output in state["monitors"]:
@@ -222,6 +223,11 @@ def plan_activation(snapshot, target, reply):
     require(all(port_key(c.name) in by_port
                 for c in snapshot.connectors if c.status == "connected"),
             "GNOME's connected output inventory differs from Linux.")
+    return name, state
+
+
+def plan_activation(snapshot, target, reply):
+    name, state = validated_configuration(snapshot, target, reply, enabled=False)
     modes = state["monitors"][name]["modes"]
     preferred = [identifier for identifier, mode in modes.items() if mode["preferred"]]
     require(len(preferred) == 1, "GNOME must advertise one unambiguous preferred mode for this output.")
@@ -300,11 +306,14 @@ class GNOMEBackend:
         return configuration(self.query())[1]
 
     def set_enabled(self, plan, enabled):
+        self.apply_change(plan, enabled)
+
+    def apply_change(self, plan, forward):
         self.allowed()
         serial, current = configuration(self.query())
-        require(current == (plan.before if enabled else plan.expected),
+        require(current == (plan.before if forward else plan.expected),
                 "GNOME settings changed before the operation; stale settings were not applied.")
-        desired = plan.expected if enabled else plan.before
+        desired = plan.expected if forward else plan.before
         # Verification does not change the serial. Any concurrent hot-plug or
         # change makes the following apply fail Mutter's own serial check.
         self._request("call", "ApplyMonitorsConfig", apply_arguments(serial, 0, desired))

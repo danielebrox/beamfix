@@ -17,6 +17,7 @@ from dataclasses import asdict, dataclass
 
 from .fix_backends import decode_plan
 from .gnome_fix import GNOMEBackend
+from .gnome_modes import GNOMEModeBackend
 from .kde_fix import KDEBackend, Unavailable
 from .kde_modes import KDEModeBackend
 
@@ -172,7 +173,7 @@ def serve(connection):
         plan = decode_plan(message["plan"])
         with activation_lock():
             if getattr(plan, "action", "activation") == "mode":
-                backend = KDEModeBackend(plan.mode_id)
+                backend = GNOMEModeBackend(plan.mode_id) if plan.backend == "gnome" else KDEModeBackend(plan.mode_id)
             else:
                 backend = GNOMEBackend() if plan.backend == "gnome" else KDEBackend()
             result = transact(plan, backend, channel)

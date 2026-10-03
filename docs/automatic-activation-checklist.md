@@ -41,12 +41,13 @@ Record desktop/Plasma/GNOME version, GPU/driver, projector, connection type (inc
 adapters), retained/preferred mode, observed result and any recovery failure. Do not mark
 this checklist complete based only on simulated tests or live read-only parsing.
 
-## KDE mode-sequence field checks (0.3.2)
+## KDE and GNOME mode-sequence field checks (0.3.3)
 
-Status: pending. GNOME mode sequences are not implemented yet; the planned
-portable field-test system is Fedora Workstation with GNOME. Complete the GNOME
-mode backend before using this sequence checklist on that computer. The GNOME
-activation checks above remain applicable independently.
+Status: pending physical validation. Both mode backends are implemented.
+The planned portable field-test system is Fedora Workstation with GNOME.
+Record the actual Fedora and GNOME versions. Use BeamFix 0.3.3 or later,
+GNOME Wayland and `busctl` with JSON support (or KDE Wayland with `kscreen-doctor`).
+The activation checks above remain applicable independently.
 
 Use a connected, enabled external projector and another active screen. Put the
 terminal on the other screen. Use a separate-screen layout, without cloning.
@@ -70,5 +71,61 @@ and complete or skip the input check to reach the mode preview.
 7. Record projector switching/settling time. If 15 seconds is too short to judge
    the image reliably, record that as a usability failure for follow-up.
 
+8. On GNOME, verify that the selected mode supports the existing scale and that
+   fractional scaling, rotation, primary screen and positions remain unchanged.
+   A layout with the projector to the left may exclude smaller resolutions to
+   avoid a gap; manual fallback with no eligible candidate is an expected result.
+9. On GNOME, check that confirmed changes remain temporary for the session and
+   that BeamFix does not rewrite the saved display profile. Test denial or an
+   unsupported session: manual guidance must remain available without KDE writes.
+
 Record mode order, each visual outcome and every undo result. Simulated tests
 alone do not complete these checks.
+
+## Shared classroom-system checks (0.3.4)
+
+Status: pending on the portable Fedora Workstation GNOME computer and a real
+classroom system. Simulated tests do not establish physical compatibility.
+
+1. Describe the actual connection, or choose unknown. Select the computer output
+   feeding the classroom system; do not assume each physical display is listed.
+2. If room monitors work but the projector does not, choose that symptom. Check
+   room source/projector blank controls if accessible, then reach mode trials.
+   Do not change installed classroom wiring. Confirm that laptop mirroring is
+   not offered for this symptom.
+3. For each completed manual step or automatic trial, record what appears on the
+   projector separately from the room monitors. Only a correct projector image
+   should receive a success confirmation. Record any effect on the room monitors.
+4. Measure time from a mode change to a stable projector image. Record delayed
+   relocking and transient connection changes. If 15 seconds is insufficient,
+   let the attempt restore and stop; record this as an unresolved usability issue.
+5. Check the summary's initial symptom, initial/latest user-reported connection,
+   computer output counts, modes, visual results and automatic recovery details.
+   The output count must not be presented as the physical room display count.
+6. If a direct connection is accessible, perform that manual test and describe
+   the new path when prompted. Verify the initial room context remains in the
+   summary. Skip this test when it requires inaccessible equipment or changing
+   installed classroom wiring.
+
+## Read-only signal report checks (0.3.5)
+
+Use the actual Fedora Workstation GNOME classroom computer. Ensure the optional
+`drm_info` tool is available in the same terminal environment as BeamFix.
+
+**Before the classroom visit:** explicitly mention the `drm_info` requirement in
+setup/handoff instructions and check its availability on the portable computer.
+BeamFix's Python installation does not install it. If it is missing, basic
+diagnostics still work, but signal properties and detailed timings are unavailable.
+
+1. Collect `beamfix doctor --json --connection room --visual-result room_monitors_only`
+   while the projector fails but room monitors work. Redirect the output to a file
+   if you want to retain it. Use the actual symptom/path if different.
+2. When the projector actually works, collect a second report with
+   `--visual-result projector_visible`; record any changed cables/ports/room controls.
+3. Check each connector's signal coverage before comparing values. Missing data
+   must not turn into zero, RGB, eight-bit output, SDR or disabled HDCP assumptions.
+4. Compare configured timings, property requests/limits and driver statuses.
+   Preserve timing variants at equal resolution/Hz; distinguish listed from current.
+5. Record Fedora/GNOME version, driver, drm_info version and any unavailable fields.
+   A difference is an investigative lead, not proof of causation. These reports do
+   not measure the signal received by a projector hidden behind classroom equipment.

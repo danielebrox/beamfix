@@ -1,6 +1,7 @@
 """Explicit automatic-backend selection; never send writes to a fallback desktop."""
 
 from .gnome_fix import GNOMEActivationPlan, GNOMEBackend
+from .gnome_modes import GNOMEModeBackend, GNOMEModePlan
 from .kde_fix import ActivationPlan, KDEBackend, Unavailable
 from .kde_modes import ModePlan, plan_modes
 
@@ -10,7 +11,7 @@ def prepare_modes(snapshot, target):
     if isinstance(backend, KDEBackend):
         from .collect import collect
         return plan_modes(collect(), target, backend.query())
-    raise Unavailable("Automatic mode trials are currently available on KDE Wayland only; use manual mode checks on GNOME.")
+    return GNOMEModeBackend().prepare_modes(target)
 
 
 def backend_for(snapshot):
@@ -32,6 +33,8 @@ def decode_plan(payload):
     action = payload.get("action", "activation")
     if action == "mode" and kind == "kde":
         return ModePlan(**payload)
+    if action == "mode" and kind == "gnome":
+        return GNOMEModePlan(**payload)
     if action != "activation":
         raise Unavailable("Unknown automatic display action.")
     if kind == "kde":

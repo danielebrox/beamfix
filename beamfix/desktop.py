@@ -136,4 +136,6 @@ def add_current_modes(snapshot: Snapshot) -> Snapshot:
 
 
 def collect_doctor() -> Snapshot:
-    return add_current_modes(collect())
+    from .signal import add_signal_details
+
+    return add_signal_details(add_current_modes(collect()))

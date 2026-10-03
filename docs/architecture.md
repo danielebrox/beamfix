@@ -31,6 +31,23 @@ they remain insufficient, the flow stops without inferring a fault. EOF, Ctrl+C
 and the `0` option produce a summary with an unconfirmed outcome. Nothing is
 saved automatically; manual changes remain under the user's control.
 
+## Classroom context
+
+The guided session stores a user-reported connection path separately from Linux
+observations. No connector name, monitor identity or visual symptom establishes
+a physical topology. The `room_monitors_only` symptom does not imply success or
+prove the cause of the problem. It selects classroom control checks and mode
+trials instead of laptop mirroring when the computer output is active; existing
+unknown-state and disabled-output handling takes precedence.
+
+The initial symptom and connection survive later changes. After a completed
+manual direct-connection test the path becomes unknown until the user describes
+it again. Initial/latest snapshots summarize enabled computer outputs and their
+observed modes, including internal screens; unknown enablement remains explicit.
+These counts cannot identify displays hidden behind a shared AV system. All
+context remains in memory and is printed in the guided summary; the doctor JSON
+schema, automatic transaction protocol and recovery deadlines are unchanged.
+
 ## Collection and tests
 
 The initial backend is read-only. Tests inject a temporary DRM tree to simulate
@@ -49,7 +66,7 @@ present in some Wayland sessions through XWayland.
 ## Applying a fix: shared recovery and KDE/Wayland activation
 
 The default guided flow remains manual. `--try-fix` offers scoped activation at
-the `activate` step and KDE mode trials at the `mode` step.
+the `activate` step and KDE/GNOME mode trials at the `mode` step.
 `kde_fix.py` builds an `ActivationPlan` independently of the
 public diagnostic model. It records mode IDs/lists, output IDs, activation,
 position, scale, rotation, priority and replication state for all KDE outputs,
@@ -315,9 +332,124 @@ and original configuration. Each worker acquires the shared lock and revalidates
 its plan; intervening changes between workers cause refusal. Summary details
 retain every attempted mode and result, without saving a report automatically.
 
-The sequence and terminal decisions are shared orchestration. GNOME mode planning
-and writes remain to be added for the Fedora Workstation field-test target;
-selecting GNOME today yields manual mode instructions without querying a KDE
-write backend. Tests exercise simulated state, real terminal input, sockets,
-helper timeout, terminal death, restoration and exhaustion. They do not establish
-physical projector behavior or GNOME mode-trial support.
+The sequence and terminal decisions are shared orchestration. `mode_trials.py`
+owns the common limit, ranking and overlap check. Backend selection routes KDE
+and GNOME explicitly, without cross-desktop fallback. Tests exercise simulated
+state, real terminal input, sockets, helper timeout, terminal death, restoration
+and exhaustion. They do not establish physical projector behavior.
+
+## GNOME mode sequences
+
+`gnome_modes.py` builds `GNOMEModePlan` objects using the shared GNOME inventory
+validation with an already active external target and another verified active
+screen. The plan changes only the target logical monitor's mode ID. The original
+layout, identities, monitor inventory, supported modes, scale, transforms,
+primary status, color/underscan/RGB settings and inactive outputs remain in the
+before/expected comparison. Volatile current flags and serials stay outside it.
+
+Candidates are distinct resolution/refresh pairs, skipping the current pair,
+interlaced modes, variable-refresh modes and modes that do not support the
+existing scale. `logical_size` handles rotated and physical/logical layouts.
+Each candidate must have integral, bounded logical dimensions, no overlapping
+rectangles and one connected graph of screens sharing edges of positive length.
+This conservative check skips size changes that create gaps without moving other
+screens. Mutter's verification remains authoritative for hardware limits and
+other configuration constraints; a rejected verification ends the sequence.
+
+`GNOMEModeBackend` rebuilds the selected candidate before each trial. It shares
+`GNOMEBackend.apply_change` with activation: read permission and a fresh state,
+require the expected starting layout, verify the desired layout with method 0,
+then apply it temporarily with method 1 and the same fresh serial. Undo submits
+the complete original layout with a newly read serial. Method 2 is never used.
+The API contracts are defined by Mutter's
+[DisplayConfig interface](https://github.com/GNOME/mutter/blob/main/data/dbus-interfaces/org.gnome.Mutter.DisplayConfig.xml).
+Mode IDs are typed D-Bus string arguments, including IDs with punctuation or
+leading hyphens; they are not interpreted as shell code or command-line options.
+
+The worker routes `backend=gnome, action=mode` to this backend while retaining the
+shared lock, deadline and explicit-next recovery contract. A fresh identity or
+mode list mismatch invalidates the preview. Failed undo or changed external
+state yields attention and never advances. The terminal preview names GNOME and
+explains the session-only change; default troubleshooting and X11 remain manual.
+
+Tests cover fixed/variable/interlaced modes, scale constraints, primary displays,
+rotations, physical layouts, overlap/gaps, stale serials, denied writes, explicit
+next, exhaustion and helper death. The private-bus harness additionally runs a
+full detached sequence through production busctl calls to a fake Mutter service,
+verifying Next/Keep, cancellation and refusal of a swapped device. This verifies
+transport and orchestration, not a live GNOME compositor or physical projector.
+The Fedora Workstation/GNOME field checklist remains pending.
+
+
+## Optional DRM signal observation (0.3.5)
+
+`collect_doctor` adds `signal.py` after the existing mode observation. Its optional
+`drm_info -j` subprocess reads DRM state without a shell, stdin, privilege
+escalation or modesetting. A five-second timeout, output-size validation, strict
+JSON parsing (including duplicate-key rejection), and field validation preserve
+basic diagnostics when the helper fails. Supplemental availability does not change
+the basic doctor exit code. The additive `Connector.signal` object retains its own
+coverage states. It is not consumed by repair planners.
+
+Matching uses an exact `/dev/dri/cardN` key plus the `connector_id` read from the
+corresponding sysfs directory. It never joins by display names, ordering or EDID.
+Sysfs ID/status/enabled observations bracket the query and must agree with the
+snapshot. A changed or ambiguous identity is rejected. These are sequential reads,
+not an atomic hardware snapshot: identical replacements or changes away and back
+between reads cannot be excluded.
+
+Current timings require a unique connector CRTC_ID, a unique CRTC and ACTIVE=1.
+They are checked against desktop resolution/Hz when available. A listed mode is
+never substituted for unavailable current timing. Clock is in kHz; nominal Hz is
+calculated from the timing totals with interlace/doublescan/vscan accounted for.
+All timing fields and flags survive exact deduplication, including alternatives
+with the same nominal resolution/Hz. Raw mode names and mode-type preference flags
+are omitted; the repair sequence is unchanged.
+
+An allowlist admits only max bpc, Colorspace, color format, Broadcast RGB,
+HDR_OUTPUT_METADATA presence, Content Protection, HDCP Content Type and link-status.
+The HDR blob reference becomes a boolean; no blob contents or ID is retained.
+Properties carry source, interpretation, state and a note. The actual_bpc field
+is explicitly unavailable. Neither AUTO values nor missing values are interpreted
+as concrete transmitted formats. EDID, serials, device metadata, arbitrary
+properties, framebuffer details and raw responses are never serialized.
+
+Doctor accepts optional enumerated --visual-result and --connection annotations,
+placed in user_context with source=user_reported. They do not alter findings,
+exit codes or visual_confirmation=not_performed. Guided summaries show signal
+observations alongside initial/latest enabled outputs. JSON includes all listed
+detailed timings for manual comparison of failed and working sessions.
+
+Contracts consulted:
+- [drm_info JSON serializer](https://gitlab.freedesktop.org/emersion/drm_info/-/blob/master/json.c)
+- [drm_info command interface](https://gitlab.freedesktop.org/emersion/drm_info/-/blob/master/main.c)
+- [Linux DRM connector properties](https://www.kernel.org/doc/html/latest/gpu/drm-kms.html#standard-connector-properties)
+- [Linux connector sysfs implementation](https://github.com/torvalds/linux/blob/master/drivers/gpu/drm/drm_sysfs.c)
+
+Live read-only verification on the development KDE computer used a temporary
+build of upstream drm_info 2.10.0. It reported an active HDMI timing and properties,
+34 listed timings, and an inactive built-in screen. It did not verify projection,
+Fedora/GNOME behavior or actual transmitted color depth. The optional helper is
+not bundled with BeamFix.
+
+## Optional local graphical interface (0.4.0)
+
+`gui.py` provides a loopback-only HTTP transport and explicit guided state machine.
+It reuses `collect_doctor`, `diagnose`, troubleshooting steps and backend planners.
+`web/` holds dependency-free HTML, CSS, JavaScript and SVG situation illustrations.
+The CLI imports the GUI only for `gui`; diagnostics and terminal troubleshooting
+continue without a browser or GUI server.
+
+A lock serializes state transitions. Each request carries a session revision;
+confirmation additionally requires the current trial nonce and an unexpired
+worker deadline. Preview stores server-owned plans. Apply runs the existing
+`automatic` client on a background thread; the independent recovery worker and
+its IPC contract are unchanged. Missing browser heartbeats cancel confirmation,
+and a guarded sequence refuses another trial after cancellation. No server API
+accepts arbitrary commands, shell text or a client-created display plan.
+
+The HTTP handler serves allowlisted packaged assets, requires a per-launch header
+secret for APIs, validates Host/Origin, restricts request size and sets CSP.
+The GUI report keeps observed diagnostics separate from reported visual results.
+Packaging includes the assets in wheels and in a pure-Python portable bundle;
+its user installer adds independent command and desktop-menu entry points.

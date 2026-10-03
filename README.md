@@ -3,12 +3,13 @@
 Local diagnostics for monitors and projectors on Linux. The goal is a simple
 workflow: connect the projector, run BeamFix, try a fix and confirm the result.
 
-**Status: KDE mode trials and KDE/GNOME automatic activation, v0.3.2 (experimental).** The `doctor` command collects data and
+**Status: v0.4.0 — offline graphical interface, portable packaging and independent CLI (experimental).** The `doctor` command collects data and
 reports potential issues; `troubleshoot` guides one step at a time and checks the
 outcome with the user. Opt in with `troubleshoot --try-fix` to try reversible
 activation of a disabled external output on KDE or GNOME Wayland, or a bounded sequence
-of mode trials on an already active KDE output. Real-projector validation
-of automatic activation remains open; a graphical interface is on the roadmap.
+of mode trials on an already active KDE or GNOME output. Real-projector validation
+of automatic activation remains open. The optional graphical interface runs locally
+in your browser and shares the existing diagnostics and recovery worker.
 
 ![BeamFix diagnostic report and guided troubleshooting](docs/images/cli-preview.svg)
 
@@ -18,6 +19,12 @@ terminal theme.*
 ## Quick start
 
 Requires Linux and Python 3.11 or later. From the repository directory:
+
+**For advanced signal diagnostics, install the optional `drm_info` tool.**
+This is also required on the Fedora Workstation GNOME classroom computer to
+collect signal properties and detailed timings. Installing BeamFix does not
+install `drm_info`. Without it, BeamFix explicitly reports signal details as
+unavailable and keeps basic diagnostics working.
 
 ```bash
 python3 -m beamfix doctor
@@ -49,6 +56,43 @@ Installation may download build tools; BeamFix itself runs offline. If you have
 already installed an earlier version, run `.venv/bin/python -m pip install .`
 again to update the command in the virtual environment. Running
 `python3 -m beamfix` from the repository directory uses the local source directly.
+
+## Graphical interface and offline package (0.4.0)
+
+![BeamFix graphical interface with simulated display data](docs/images/gui-preview.jpg)
+
+*Browser preview using demonstration data; not a projector hardware test.*
+
+```bash
+python3 -m beamfix gui
+python3 -m beamfix gui --demo  # simulated data; no automatic changes
+```
+
+The GUI runs entirely on this computer, without Internet access, browser plugins,
+external assets or Python runtime dependencies. Choose one of four illustrated
+situations, identify the output, follow a manual check or preview an automatic
+attempt, then confirm the image on the projector itself. Diagnostics and session
+summaries can be saved explicitly as JSON. The CLI remains fully independent.
+
+Download the [experimental 0.4.0 release](https://github.com/danielebrox/beamfix/releases/tag/v0.4.0).
+For another Linux computer, extract the **portable asset**
+`beamfix-0.4.0-linux-portable.tar.gz` and run:
+
+```bash
+cd beamfix-0.4.0
+python3 launch.py gui        # portable: no installation
+python3 install.py          # optional user installation and application-menu entry
+```
+
+The installed menu entry is **BeamFix**; commands are `beamfix`, `beamfix gui`
+and `beamfix-gui`. The installer uses `~/.local`, refuses unrelated existing
+launchers and needs no `sudo`, pip or network. Python 3.11+ and a modern browser
+must already be installed. Optional desktop tools are supplied by the distribution.
+Uninstall with `python3 install.py --uninstall` from the extracted bundle.
+
+A standard wheel and source distribution are also built. See the
+[GUI and packaging guide](docs/graphical-interface.md) for installation, recovery
+behavior, compatibility boundaries and the Fedora/GNOME field checklist.
 
 ## Current resolution and refresh rate
 
@@ -235,7 +279,82 @@ D-Bus session, including stale-serial rejection. **A real GNOME session and
 real-projector activation/rollback have not been verified yet.** See the
 [field checklist](docs/automatic-activation-checklist.md) for that remaining check.
 
-## Automatic mode trials on KDE Wayland
+## Signal diagnostics (0.3.5)
+
+Both `doctor` and guided before/after summaries now include optional, read-only
+signal observations through `drm_info -j`. Install your distribution's `drm_info`
+package to enable them (on Fedora, the package is named `drm_info`). BeamFix does
+not install tools, elevate privileges or change display settings for this read.
+Without the tool or device access, signal details explicitly remain unavailable;
+basic diagnostics continue. The optional query has a five-second timeout.
+
+The report distinguishes:
+
+- `max_bpc`: a configured upper limit, **not measured transmitted bit depth**.
+- Colorspace, color format and RGB range: driver properties requesting settings;
+  `Default` or `AUTO` does not establish the format actually sent on the cable.
+- HDR metadata presence: a metadata reference, **not proof of visible HDR**.
+- Content Protection / HDCP content type and link status: reported driver state
+  or requests, **not a diagnosis of the cause of a missing picture**.
+- Current detailed timing: a verified active CRTC's configured timing, including
+  pixel clock, synchronization intervals, totals and flags; not a wire measurement.
+- Listed detailed timings: available kernel entries, preserving timing differences
+  even at identical resolution/Hz. Complete alternatives are in JSON. Listing a
+  timing does not establish projector compatibility.
+
+Each signal property includes source, state, interpretation and a note. Missing,
+invalid and conflicting data remain explicit. Actual transmitted bit depth is
+unavailable in this backend. A separate `signal` object is added per connector;
+existing JSON v1 fields and basic diagnostic exit-code semantics remain intact.
+Optional missing properties do not themselves indicate a display fault or turn
+an otherwise complete basic observation into exit code 2. Check the signal object's
+coverage when comparing reports. This observation does not broaden automatic
+mode trials, which still deduplicate by resolution/Hz and keep existing safeguards.
+
+To collect comparable reports in the classroom, add your visual result and
+connection description. These labels are user-reported, not inferred:
+
+```bash
+beamfix doctor --json --connection room --visual-result room_monitors_only > room-failed.json
+# Run the second command only when you can actually see the image on the projector:
+beamfix doctor --json --connection room --visual-result projector_visible > room-working.json
+```
+
+Run both on the same computer and port if possible, and note any cable or room
+control changes. The shell redirection saves the reports at your request; BeamFix
+itself does not save or upload them. `visual_confirmation` remains `not_performed`
+for doctor; the separate `user_context` records your annotation. No comparison
+can establish a fault from one differing setting alone.
+
+## Classroom systems (0.3.4)
+
+The guided flow asks how the computer is connected: directly, through a dock or
+adapter, through a classroom socket/shared AV system, or an unknown path. This
+is user-reported context, not a detected topology. Select the computer output
+feeding the room system even if the projector is not listed separately.
+
+Choose **The classroom monitors show the image, but the projector does not**
+when applicable. BeamFix starts with the room's source and projector blank/mute
+controls, where accessible, then offers alternative modes for an active output.
+It does not suggest laptop mirroring for this symptom. Unknown or disabled
+computer outputs still require their existing diagnostic or activation checks.
+Reconnect guidance concerns the computer end; a direct-connection test can be
+skipped when it would require changing installed classroom wiring.
+
+Confirm success only when the **projector itself** shows the expected image.
+The summary retains the initial symptom, initial/latest user-reported connection,
+per-step visual outcomes and initial/latest computer output counts and modes.
+Computer output counts do not reveal how many physical screens a room system
+feeds. Completing a direct-connection test asks for the connection path again.
+
+Automatic attempts retain the 15-second confirmation window and existing undo
+behavior. If the projector has not settled in time, do not confirm based on a
+working room monitor. Let the attempt restore and stop, and record the delay in
+the [field checklist](docs/automatic-activation-checklist.md). Classroom timing
+and compatibility still require real Fedora/GNOME testing. EDID identification and saved room profiles remain future work. Signal diagnostics
+were added separately in 0.3.5, as described above.
+
+## Automatic mode trials on KDE and GNOME Wayland
 
 Run `python3 -m beamfix troubleshoot --try-fix`, select No signal or a black
 screen, and explicitly select the external output. For an already active output,
@@ -244,7 +363,7 @@ resolution/refresh combinations before the manual mirroring step. It shows the
 whole sequence before asking for approval. Disabled outputs use the activation
 workflow above; it does not automatically chain activation into mode trials.
 
-The sequence uses only exact mode IDs from KDE's current list. It skips the
+The sequence uses only exact mode IDs from the current desktop configuration. It skips the
 current resolution/refresh combination and duplicates. It orders alternatives
 by refresh closest to 60 Hz, then prioritizes sizes up to 1920 x 1080, largest
 first. This is a troubleshooting order, not evidence of projector compatibility.
@@ -253,8 +372,13 @@ the existing scale are omitted. The list is bounded, not an exhaustive search.
 
 Every trial requires another active screen verified against Linux. Keep the
 terminal on that screen. Output positions, scaling, rotation and priority stay
-unchanged. Cloned or overlapping screens, automatic preferred-mode selection,
-ambiguous names and unreadable settings fall back to manual guidance.
+unchanged. Cloned or overlapping screens, ambiguous names and unreadable settings
+fall back to manual guidance. KDE also refuses automatic preferred-mode selection.
+GNOME requires each candidate to support the existing scale, use fixed refresh
+and non-interlaced output, and keep the desktop connected without creating gaps
+between screens. It omits alternatives that fail these checks. Depending on the
+layout, only refresh-rate changes may be eligible; BeamFix does not reposition
+other screens to make a different resolution fit.
 
 After each applied mode, a fresh read must match the expected configuration.
 Within 15 seconds, answer **1 and Enter** to keep the mode and finish, **2 and
@@ -271,10 +395,23 @@ sequence returns `0` only after explicit visual confirmation. The shared helper
 has the same recovery limits described above. The mode command does not promise
 session-only persistence on KDE; check Display settings for saved behavior.
 
-**GNOME mode trials are the next implementation target**, including the Fedora
-Workstation field-test machine. GNOME currently retains automatic activation
-and manual mode changes. Tests cover simulated mode trials and real helper
-process death; real-projector mode switching is still unverified.
+On **GNOME Wayland, including the intended Fedora Workstation test system**, mode
+trials use `busctl` with JSON support and Mutter's DisplayConfig service, as does
+automatic activation. Each change is verified and applied with a fresh serial.
+Even after confirmation it remains temporary for the current session: BeamFix
+does not save a display profile. GNOME X11 falls back to manual instructions.
+
+From the project directory on Fedora, check `python3 -m beamfix --version`
+(requires 0.3.3 or later), then run `python3 -m beamfix troubleshoot --try-fix`
+in a terminal on the laptop screen. Keep both the laptop screen and projector
+output enabled in an extended layout. Select the projector explicitly. If the
+projector output is disabled, complete the separate activation workflow first.
+
+Tests cover simulated mode trials, real helper process death, and a full detached
+GNOME mode sequence over an isolated D-Bus service. **A real GNOME session and
+physical projector still require field validation.** Follow the
+[field checklist](docs/automatic-activation-checklist.md) and record Fedora/GNOME
+versions and the actual hardware; simulated results do not certify compatibility.
 
 ## What BeamFix checks today
 
@@ -285,9 +422,8 @@ process death; real-projector mode switching is still unverified.
 - Connected but disabled outputs, missing modes and inaccessible data.
 - An English terminal report or JSON with a schema version and diagnostic codes.
 
-BeamFix reads `/sys/class/drm`, optional KDE/Wayland observations, and two session variables:
-`XDG_SESSION_TYPE` and `XDG_CURRENT_DESKTOP`. Only the required output-state and
-mode fields are retained; raw tool responses, descriptions, EDID data, serial numbers,
+BeamFix reads `/sys/class/drm`, optional KDE/Wayland and `drm_info` observations, and two session variables:
+`XDG_SESSION_TYPE` and `XDG_CURRENT_DESKTOP`. Only the required output-state, mode, allowlisted signal-property and timing fields are retained; raw tool responses, descriptions, EDID data, serial numbers,
 profile paths, hostnames, accounts and system logs are not included in reports.
 GNOME automatic attempts additionally read Mutter state over the local session
 bus. The private in-memory plan holds a digest of monitor identity for swap
@@ -300,7 +436,7 @@ them before sharing.
 
 An enabled output does not prove that the image is visible or correct. This
 version can read resolution and Hz from KDE or Wayland, but does not measure
-instantaneous refresh, scaling, audio, HDCP or cable quality. It cannot reliably distinguish a monitor from a projector.
+instantaneous refresh, scaling, audio or cable quality. Optional HDCP properties report driver state, not downstream image visibility. It cannot reliably distinguish a monitor from a projector.
 USB-C may appear as DisplayPort: the DRM connector type does not identify the
 physical cable.
 

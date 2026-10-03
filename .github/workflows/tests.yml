@@ -29,3 +29,54 @@ jobs:
           python -m pip install .
           cd /tmp
           beamfix --version
+      - name: Build and check offline release artifacts
+        run: |
+          python -m pip install setuptools wheel
+          python scripts/build_release.py
+          python scripts/check_release.py
+      - name: Keep tested release packages
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v7
+        with:
+          name: beamfix-release-packages
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    needs: tests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[release]')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: beamfix-release
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/download-artifact@v8
+        with:
+          name: beamfix-release-packages
+          path: dist
+      - name: Publish an experimental release from the tested commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          version=$(python -c 'from beamfix import __version__; print(__version__)')
+          tag="v${version}"
+          test -f "docs/releases/${version}.md"
+          (cd dist && sha256sum -c "beamfix-${version}-SHA256SUMS")
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release $tag already exists; refusing to overwrite it."
+            exit 1
+          fi
+          gh release create "$tag" dist/* \
+            --target "$GITHUB_SHA" \
+            --title "BeamFix ${version} — experimental" \
+            --notes-file "docs/releases/${version}.md" \
+            --prerelease

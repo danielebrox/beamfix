@@ -339,3 +339,4 @@ class PrivateBusTests(unittest.TestCase):
                                 capture_output=True, text=True, timeout=30)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("GNOME private-bus integration passed", result.stdout)
+        self.assertIn("GNOME mode-bus integration passed", result.stdout)

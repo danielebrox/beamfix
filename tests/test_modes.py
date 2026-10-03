@@ -110,13 +110,15 @@ class ModePlanningTests(unittest.TestCase):
         self.assertEqual([p.mode_id for p in sequence], ["2", "4"])
         self.assertEqual(sequence[0].expected["HDMI-A-1"]["rotation"], 2)
 
-    def test_gnome_mode_trials_explicitly_fall_back_without_querying_kde(self):
+    def test_gnome_mode_trials_use_gnome_without_querying_kde(self):
         snapshot, _ = fixture()
-        with patch("beamfix.kde_fix.KDEBackend.query") as query, self.assertRaisesRegex(Unavailable, "GNOME"):
-            prepare_modes(replace(snapshot, desktop="GNOME"), snapshot.connectors[1].name)
+        with patch("beamfix.kde_fix.KDEBackend.query") as query, \
+                patch("beamfix.gnome_modes.GNOMEModeBackend.prepare_modes", return_value="gnome-plans") as prepare:
+            self.assertEqual(prepare_modes(replace(snapshot, desktop="GNOME"), snapshot.connectors[1].name), "gnome-plans")
+            prepare.assert_called_once_with(snapshot.connectors[1].name)
         query.assert_not_called()
         with self.assertRaises(Unavailable):
-            decode_plan({**asdict(plans()[0]), "backend": "gnome"})
+            decode_plan({**asdict(plans()[0]), "backend": "unsupported"})
 
     def test_exact_mode_commands_apply_and_restore_without_shell(self):
         plan = plans()[0]
@@ -250,7 +252,7 @@ class ModeInterfaceTests(unittest.TestCase):
 
     def test_guided_flow_offers_modes_before_mirroring_and_reports_confirmation(self):
         for status, code in (("kept", 0), ("exhausted", 2), ("attention", 2), ("reverted", 2)):
-            answers = iter(["1", "1", "2"])  # no signal, external output, skip input check
+            answers = iter(["1", "4", "1", "2"])  # no signal, unknown path, output, skip input
             output = []
             with patch("beamfix.troubleshoot.offer_modes", return_value=FixResult(status, "trial history", True)) as offer:
                 self.assertEqual(run(snapshot_reader=lambda: fixture()[0], read=lambda _: next(answers),

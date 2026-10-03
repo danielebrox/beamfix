@@ -19,6 +19,46 @@ class CurrentMode:
 
 
 @dataclass(frozen=True)
+class SignalProperty:
+    state: str  # reported, unavailable or invalid; never a wire measurement
+    meaning: str  # limit, requested, driver_status or unmeasured
+    source: str
+    value: int | str | bool | None = None
+    note: str = ""
+
+
+@dataclass(frozen=True)
+class SignalTiming:
+    pixel_clock_khz: int
+    width: int
+    height: int
+    hsync_start: int
+    hsync_end: int
+    htotal: int
+    hskew: int
+    vsync_start: int
+    vsync_end: int
+    vtotal: int
+    vscan: int
+    flags: int
+    nominal_refresh_hz: float
+
+
+@dataclass(frozen=True)
+class SignalDetails:
+    state: str  # observed, unavailable, inconsistent or inactive
+    source: str
+    reason: str
+    properties: dict[str, SignalProperty] = field(default_factory=dict)
+    current_timing: SignalTiming | None = None
+    current_timing_state: str = "unavailable"
+    current_timing_reason: str = "Current timing could not be read."
+    listed_timings: tuple[SignalTiming, ...] = ()
+    listed_timings_state: str = "unavailable"
+    invalid_listed_timings: int = 0
+
+
+@dataclass(frozen=True)
 class Connector:
     name: str
     kind: str
@@ -26,6 +66,7 @@ class Connector:
     enabled: str
     modes: tuple[str, ...] | None
     current_mode: CurrentMode | None = None
+    signal: SignalDetails | None = None
 
 
 @dataclass(frozen=True)

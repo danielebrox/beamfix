@@ -20,7 +20,8 @@ def confirm_in_terminal(ui, seconds):
         return False
     termios.tcflush(fd, termios.TCIFLUSH)
     ui.section("VERIFY THE AUTOMATIC ATTEMPT")
-    ui.text(f"You have up to {max(0, int(seconds))} seconds. Can you see the image you wanted to project?")
+    ui.text(f"You have up to {max(0, int(seconds))} seconds. Does the projector itself show the expected image?")
+    ui.text("An image on the laptop or classroom monitors alone is not confirmation.")
     ui.option(1, "Yes: keep this activation")
     ui.option(2, "No / cannot verify: undo activation")
     ui.text("Press Enter after your choice. No answer also undoes the activation.")
@@ -39,8 +40,9 @@ def confirm_mode_in_terminal(ui, seconds):
     if not os.isatty(fd):
         return "undo"
     termios.tcflush(fd, termios.TCIFLUSH)
-    ui.section("CAN YOU SEE THE EXPECTED IMAGE?")
+    ui.section("DOES THE PROJECTOR ITSELF SHOW THE EXPECTED IMAGE?")
     ui.text(f"You have up to {max(0, int(seconds))} seconds.")
+    ui.text("An image on the laptop or classroom monitors alone is not confirmation.")
     ui.option(1, "Yes: keep this mode and finish")
     ui.option(2, "No: restore, then try the next mode")
     ui.option(0, "Stop and restore the original mode")
@@ -56,7 +58,7 @@ def confirm_mode_in_terminal(ui, seconds):
 
 def run_mode_sequence(plans, confirm, *, run_attempt=None):
     """Backend-independent sequence; only a worker-verified next can advance."""
-    from .kde_modes import MAX_MODE_TRIALS
+    from .mode_trials import MAX_MODE_TRIALS
     run_attempt = run_attempt or run_activation
     if not plans or len(plans) > MAX_MODE_TRIALS:
         return FixResult("refused", "The mode sequence is empty or exceeds the trial limit.")

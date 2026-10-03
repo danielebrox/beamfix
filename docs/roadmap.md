@@ -107,17 +107,66 @@ Cloning, leased monitors, uncertain observations and unsupported settings stay m
 - Shared confirmation/recovery and sequence control, ready for another mode backend.
 - Simulated planner, UI, transaction and detached-process recovery tests.
 
-The next implementation priority is **GNOME mode trials for Fedora Workstation**.
-The planned real-projector field test is on the portable Fedora Workstation
-computer using GNOME, not the KDE development machine. A KDE-only sequence
-does not complete that field-test requirement. GNOME activation remains available;
-GNOME mode trials are currently manual. Physical validation remains pending.
+### 0.3.3 — GNOME mode trials (implemented; field validation open)
 
-## 0.4 — Everyday use
+- Share the bounded sequence, mode ordering, Keep/Next/Stop decisions and recovery.
+- Use GNOME's exact mode IDs with fixed refresh, no interlacing and the existing scale.
+- Preserve positions, transforms, primary screen and captured color/underscan settings.
+- Skip candidates that overlap screens, create gaps or require fractional-size rounding.
+- Verify and apply temporary layouts through Mutter using fresh serials; no saved profile.
+- Restore and verify the original layout before an explicit next trial.
+- Cover mode selection, UI, helper death and typed D-Bus writes in simulated tests.
+- Run a complete detached sequence against an isolated fake Mutter service.
 
-An interface with Diagnose and Try a fix actions; mirroring/extension and broader
-mode-trial support using backend data. Add HDMI audio diagnostics and further
-desktop environments after field validation of the existing backends.
+The next validation priority is the **portable Fedora Workstation computer with
+GNOME and a real projector**. Both backends are implemented; compatibility with
+that machine and physical activation/mode switching remain unverified. Record
+Fedora/GNOME versions, GPU/driver, connection, mode outcomes and recovery results
+using the field checklist.
+
+### 0.3.4 — Shared classroom systems (implemented; field validation open)
+
+- Ask for the connection path, retaining unknown and user-reported provenance.
+- Add the symptom: room monitors show the image but the projector does not.
+- Guide room-source/projector blank checks and then modes, without laptop mirroring
+  for that symptom; retain unknown-state and activation prerequisites.
+- Confirm the image on the projector itself in manual and automatic flows.
+- Summarize initial symptom, initial/latest connection and enabled computer outputs
+  with their observed modes; do not infer the downstream physical display count.
+- Refresh the user-reported path after a completed direct-connection test.
+- Preserve the existing automatic confirmation deadline and recovery procedures.
+
+Validate on the Fedora Workstation GNOME classroom system. Record settling time
+before changing timeouts. Read-only signal-format diagnostics and optional local
+profiles remain possible future increments, not implemented features.
+
+### 0.3.5 — Read-only signal diagnostics (implemented; classroom validation open)
+
+- Optional drm_info reader, matched by GPU node and sysfs connector ID.
+- Allowlisted color, maximum-depth, HDR-reference and HDCP/link properties with
+  explicit requested/limit/driver-status meanings and missing-data states.
+- Active CRTC timing and listed detailed alternatives, preserving distinct timings
+  with the same resolution/Hz without changing the automatic trial planners.
+- Additive JSON signal data and compact initial/latest guided summaries.
+- Optional user-reported connection and visual-result labels for comparing reports.
+- Simulated parser, matching, conflict, privacy, query and report tests; real
+  read-only development-machine check using a temporary upstream helper build.
+
+Verify on Fedora Workstation GNOME in the actual classroom. Effective wire-format
+measurement, changing color parameters, EDID identification, automatic timing
+variants and saved room profiles remain outside this release.
+
+## 0.4 — Everyday use (GUI and packaging implemented; field validation open)
+
+- Offline browser GUI sharing diagnostics, guided steps and recovery worker.
+- Four SVG situation examples, classroom connection context and explicit output selection.
+- Manual checks, automatic previews, timed Keep/Next/Stop and session exports.
+- Independent CLI plus wheel, source archive and offline portable Linux bundle.
+- User installer with application-menu entry and reversible removal.
+
+Validate browser rendering, keyboard operation, installed launchers and real
+Fedora/GNOME projector recovery before classroom acceptance. Broader desktop
+support, automatic mirroring/extension and HDMI audio remain future increments.
 
 ## Before a public release
 

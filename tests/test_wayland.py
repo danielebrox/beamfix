@@ -203,7 +203,7 @@ class WaylandPresentationTests(unittest.TestCase):
 
     def test_guided_before_after_and_visual_confirmation_remain_distinct(self):
         data = [apply_wayland_modes(snapshot(), output(rate=rate)) for rate in ('30.000', '60.000')]
-        answers = iter(['2', '1', '1', '5'])
+        answers = iter(['2', '4', '1', '1', '6'])
         lines = []
         with patch('beamfix.troubleshoot.collect', side_effect=data):
             code = run(read=lambda _: next(answers), write=lines.append)

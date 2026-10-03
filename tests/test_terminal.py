@@ -117,7 +117,7 @@ class TerminalTests(unittest.TestCase):
 
     def test_colored_guided_session_retains_confirmation_and_summary(self):
         ui, lines = self.capture(is_tty=True, width=60)
-        answers = iter(["1", "1", "1", "1"])
+        answers = iter(["1", "4", "1", "1", "1"])
         code = run(snapshot_reader=sample, read=lambda _: next(answers), terminal=ui)
         output = ANSI.sub("", "\n".join(lines))
         self.assertEqual(code, 0)

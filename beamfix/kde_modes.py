@@ -8,9 +8,7 @@ from dataclasses import dataclass
 
 from .collect import collect
 from .kde_fix import KDEBackend, Unavailable, validated_configuration
-
-
-MAX_MODE_TRIALS = 5
+from .mode_trials import MAX_MODE_TRIALS, mode_rank, overlaps
 
 
 def mode_label(mode):
@@ -50,10 +48,6 @@ def rectangle(output, mode_id):
     return output["pos"]["x"], output["pos"]["y"], width, height
 
 
-def overlaps(a, b):
-    return a[0] < b[0] + b[2] and b[0] < a[0] + a[2] and a[1] < b[1] + b[3] and b[1] < a[1] + a[3]
-
-
 def plan_modes(snapshot, target, data):
     name, before = validated_configuration(snapshot, target, data, enabled=True)
     output = before[name]
@@ -70,10 +64,8 @@ def plan_modes(snapshot, target, data):
     candidates = []
     # Prefer rates closest to 60 Hz, then larger resolutions up to 1080p.
     # This is a trial order, never a claim that a listed mode will work.
-    ordered = sorted(output["modes"].items(), key=lambda item: (
-        abs(item[1]["refreshRate"] - 60),
-        item[1]["size"]["width"] > 1920 or item[1]["size"]["height"] > 1080,
-        -item[1]["size"]["width"] * item[1]["size"]["height"], item[0]))
+    ordered = sorted(output["modes"].items(), key=lambda item: mode_rank(
+        item[1]["size"]["width"], item[1]["size"]["height"], item[1]["refreshRate"], item[0]))
     for mode_id, mode in ordered:
         signature = (mode["size"]["width"], mode["size"]["height"], mode["refreshRate"])
         if signature in seen or not re.fullmatch(r"[A-Za-z0-9_-]+", mode_id):

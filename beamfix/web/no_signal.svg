@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="240" viewBox="0 0 400 240"><defs>
+  <g id="stand" stroke="#63766d" stroke-width="5" fill="none" stroke-linecap="round"><path d="M220 153v37m-22 0h44" /></g>
+  <g id="laptop"><rect x="36" y="145" width="83" height="53" rx="5" fill="#64786e" /><rect x="42" y="151" width="71" height="40" rx="2" fill="#d5e6ca" /><path d="M53 183v-10h9v10zm15 0v-19h9v19zm15 0v-26h9v26z" fill="#277461" /><path d="M28 199h99l-7 7H35z" fill="#64786e" /></g>
+  <g id="screen"><rect x="109" y="39" width="224" height="123" rx="4" fill="#75877e" /><rect x="117" y="46" width="208" height="107" rx="2" fill="#1e3435" /><path d="M105 38h232" stroke="#63766d" stroke-width="6" stroke-linecap="round" /><use href="#stand" /></g>
+ </defs>
+ <g><rect width="400" height="240" fill="#e9eeea" /><use href="#screen" /><rect x="172" y="85" width="98" height="30" rx="5" fill="#334b4c" /><text x="221" y="104" text-anchor="middle" fill="#f4f4ea" font-family="sans-serif" font-size="13">NO SIGNAL</text><use href="#laptop" /><path d="M128 184h27v-12h35" stroke="#a98148" stroke-width="3" fill="none" stroke-dasharray="6 5" /><circle cx="301" cy="178" r="6" fill="#cda95b" /></g>
+ </svg>

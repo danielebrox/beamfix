@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "beamfix"
-version = "0.3.2"
+version = "0.4.0"
 description = "Local-first Linux display diagnostics"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -12,6 +12,10 @@ dependencies = []
 
 [project.scripts]
 beamfix = "beamfix.cli:main"
+beamfix-gui = "beamfix.gui:main"
 
 [tool.setuptools.packages.find]
 include = ["beamfix*"]
+
+[tool.setuptools.package-data]
+beamfix = ["web/*.html", "web/*.css", "web/*.js", "web/*.svg"]

@@ -1,0 +1,5 @@
+recursive-include beamfix/web *.html *.css *.js *.svg
+recursive-include packaging *.py
+recursive-include scripts *.py
+recursive-include docs *.md *.svg *.jpg
+recursive-include tests *.py

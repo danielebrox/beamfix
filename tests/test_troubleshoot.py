@@ -25,6 +25,27 @@ def with_mode(width=1920, height=1080, rate=60):
 
 
 class PlanningTests(unittest.TestCase):
+    def test_room_monitors_only_uses_targeted_checks_without_mirroring(self):
+        for connection in ("room", "unknown"):
+            for automatic in (False, True):
+                tried = set()
+                while step := next_step(snapshot(port()), port().name, "room_monitors_only", tried,
+                                        try_modes=automatic, connection_path=connection):
+                    tried.add(step.code)
+                    self.assertNotIn(step.code, {"mirror", "presentation", "activate"})
+                    if len(tried) == 1:
+                        self.assertEqual(step.code, "room_input")
+                    elif len(tried) == 2:
+                        self.assertEqual(step.code, "mode")
+                self.assertEqual(len(tried), 5)
+
+    def test_room_description_does_not_override_unknown_or_disabled_state(self):
+        for connector, expected in ((port(status="unknown"), "refresh"),
+                                    (port(enabled="disabled"), "activate")):
+            step = next_step(snapshot(connector), connector.name, "room_monitors_only", set(),
+                             connection_path="room", try_modes=True)
+            self.assertEqual(step.code, expected)
+
     def plan(self, connector, symptom="no_signal", tried=()):
         return next_step(snapshot(connector), connector.name, symptom, set(tried))
 
@@ -100,9 +121,60 @@ class PlanningTests(unittest.TestCase):
 
 
 class GuidedSessionTests(unittest.TestCase):
-    def session(self, snapshots, answers):
+    def test_classroom_symptom_is_not_success_and_summary_keeps_context(self):
+        internal = port(name="card0-eDP-1", kind="internal")
+        data = snapshot(internal, with_mode())
+        code, output, _ = self.session([data, data], ["4", "1", "1", "5", "0"], connection="3")
+        self.assertEqual(code, 2)
+        summary = " ".join(output.split("SUMMARY", 1)[1].split())
+        self.assertIn("Initial symptom (user-reported): The classroom monitors", summary)
+        self.assertIn("Initial connection (user-reported): Through a classroom socket", summary)
+        self.assertIn("Visual result: The classroom monitors", summary)
+        self.assertIn("2 outputs reported enabled", summary)
+        self.assertIn("card0-eDP-1", summary)
+        self.assertIn("1920 x 1080 @ 60.00 Hz", summary)
+        self.assertIn("not a count of physical screens", summary)
+        self.assertNotIn("[CONFIRMED]", output)
+
+    def test_classroom_projection_requires_explicit_visual_confirmation(self):
+        data = snapshot(port())
+        code, output, _ = self.session([data, data], ["4", "1", "1", "1"], connection="3")
+        self.assertEqual(code, 0)
+        self.assertIn("projector itself", output)
+        self.assertIn("Visual result: expected image confirmed on the projector", " ".join(output.split()))
+
+    def test_unknown_connection_remains_unknown_despite_classroom_symptom(self):
+        code, output, _ = self.session([snapshot(port())], ["4", "1", "0"])
+        self.assertEqual(code, 2)
+        summary = " ".join(output.split("SUMMARY", 1)[1].split())
+        self.assertIn("Initial connection (user-reported): I do not know", summary)
+        self.assertIn("Check the classroom projection controls", output)
+
+    def test_direct_test_updates_connection_and_preserves_initial_context(self):
+        data = snapshot(port())
+        code, output, _ = self.session([data, data],
+            ["4", "1", "2", "2", "2", "1", "1", "1"], connection="3")
+        self.assertEqual(code, 0)
+        summary = " ".join(output.split("SUMMARY", 1)[1].split())
+        self.assertIn("Initial connection (user-reported): Through a classroom socket", summary)
+        self.assertIn("Latest connection (user-reported): A cable from the computer directly", summary)
+
+    def test_room_mode_sequence_preserves_failed_recovery_without_success(self):
+        from beamfix.fix_worker import FixResult
+        with patch("beamfix.troubleshoot.offer_modes", return_value=FixResult("attention", "Recovery uncertain", True)) as offer:
+            code, output, _ = self.session([snapshot(port()), snapshot(port())],
+                                          ["4", "1", "2"], connection="3", try_fix=True)
+        self.assertEqual(code, 2)
+        offer.assert_called_once()
+        self.assertIn("Recovery uncertain", output)
+        self.assertNotIn("[CONFIRMED]", output)
+
+    def session(self, snapshots, answers, *, connection="4", try_fix=False):
         output = []
         reader = Mock(side_effect=snapshots)
+        answers = list(answers)
+        if answers and answers[0] in ("1", "2", "3", "4"):
+            answers.insert(1, connection)
         answer_iter = iter(answers)
 
         def read(prompt):
@@ -114,7 +186,7 @@ class GuidedSessionTests(unittest.TestCase):
                 raise value
             return value
 
-        code = run(snapshot_reader=reader, read=read, write=output.append)
+        code = run(snapshot_reader=reader, read=read, write=output.append, try_fix=try_fix)
         return code, "\n".join(output), reader.call_count
 
     def test_activation_confirmed_by_user(self):
@@ -141,7 +213,7 @@ class GuidedSessionTests(unittest.TestCase):
 
     def test_known_mode_never_confirms_visual_success(self):
         data = snapshot(with_mode())
-        code, output, _ = self.session([data, data], ["2", "1", "1", "5"])
+        code, output, _ = self.session([data, data], ["2", "1", "1", "6"])
         self.assertEqual(code, 2)
         self.assertIn("Visual result: cannot be verified", output)
         self.assertNotIn("Expected image confirmed by the user", output)
@@ -165,7 +237,7 @@ class GuidedSessionTests(unittest.TestCase):
         self.assertIn("Expected image confirmed by the user", output)
 
     def test_default_reader_refreshes_desktop_modes_after_action(self):
-        answers = iter(["2", "1", "1", "1"])
+        answers = iter(["2", "4", "1", "1", "1"])
         with patch("beamfix.desktop.collect", side_effect=[snapshot(port()), snapshot(port())]) as drm, \
                 patch("beamfix.desktop.add_current_modes", side_effect=[
                     snapshot(with_mode(rate=30)), snapshot(with_mode(rate=60)),
@@ -249,7 +321,7 @@ class GuidedSessionTests(unittest.TestCase):
 
     def test_no_visual_verification_is_not_success(self):
         data = snapshot(port())
-        code, output, _ = self.session([data, data], ["2", "1", "1", "5"])
+        code, output, _ = self.session([data, data], ["2", "1", "1", "6"])
         self.assertEqual(code, 2)
         self.assertIn("Visual result: cannot be verified", output)
 

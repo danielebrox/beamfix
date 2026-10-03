@@ -264,7 +264,7 @@ class GuidedAutomaticTests(unittest.TestCase):
 
     def session(self, result):
         snapshot, _ = fixture()
-        answers = iter(["1", "1"])
+        answers = iter(["1", "4", "1"])
         output = []
         with patch("beamfix.troubleshoot.offer_activation", return_value=result):
             code = run(snapshot_reader=lambda: snapshot, read=lambda _: next(answers),
@@ -280,7 +280,7 @@ class GuidedAutomaticTests(unittest.TestCase):
 
     def test_manual_fallback_preserves_existing_flow(self):
         snapshot, _ = fixture()
-        answers = iter(["1", "1", "1", "1"])
+        answers = iter(["1", "4", "1", "1", "1"])
         with patch("beamfix.troubleshoot.offer_activation", return_value="manual"):
             self.assertEqual(run(snapshot_reader=lambda: snapshot, read=lambda _: next(answers),
                                  write=lambda _: None, try_fix=True), 0)
